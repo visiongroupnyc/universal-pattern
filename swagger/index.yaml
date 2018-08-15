@@ -1,0 +1,64 @@
+swagger: '3.0'
+info:
+  version: 0.0.1
+  title: UniversalPatter Server test
+  termsOfService: 'http://localhost:8000/terms'
+host: 'localhost'
+schemes:
+  - http
+  - https
+consumes:
+  - application/json
+  - application/octet-stream
+produces:
+  - application/json
+
+parameters:
+  q:
+    name: q
+    in: query
+    required: false
+    type: string
+    description: query params for search
+  page:
+    name: page
+    in: query
+    required: true
+    type: number
+    default: 1
+  sorting:
+    name: sorting
+    in: query
+    required: false
+    description: sorting by field
+    type: string
+  limit:
+    name: limit
+    in: query
+    required: true
+    default: 30
+    type: number
+  by_id:
+    name: '_id'
+    in: query
+    type: string
+    description: filter by _id
+    maxLength: 24
+    minLength: 24
+  apikey:
+    name: apikey
+    in: header
+    type: string
+    description: apikey access
+    required: true
+  fields:
+    name: fields
+    in: query
+    type: string
+    description: populate fields
+  coordinates:
+    name: coordinates
+    in: query
+    type: string
+    required: false
+    description: search by coordinates. Use long,lat,radiusMeters. 34.12323,-2.25525,1000

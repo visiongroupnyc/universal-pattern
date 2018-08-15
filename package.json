@@ -1,0 +1,44 @@
+{
+  "name": "universal-pattern",
+  "version": "1.0.0",
+  "description": "This is easy way to implement universal pattern, swagger and restfull api",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lortmorris/universal-pattern.git"
+  },
+  "keywords": [
+    "universal",
+    "pattern",
+    "swagger",
+    "restfull",
+    "api"
+  ],
+  "author": "César Casas",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lortmorris/universal-pattern/issues"
+  },
+  "homepage": "https://github.com/lortmorris/universal-pattern#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.4",
+    "debug": "^3.1.0",
+    "js-yaml": "^3.12.0",
+    "lodash": "^4.17.10",
+    "mongojs": "^2.6.0",
+    "swagger-ui": "^3.18.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^8.2.6",
+    "eslint": "^5.3.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.1",
+    "eslint-plugin-react": "^7.11.0",
+    "supertest": "^3.1.0"
+  }
+}
