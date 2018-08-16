@@ -1,6 +1,6 @@
 {
   "name": "universal-pattern",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "This is easy way to implement universal pattern, swagger and restfull api",
   "main": "index.js",
   "scripts": {
@@ -22,15 +22,25 @@
   "bugs": {
     "url": "https://github.com/lortmorris/universal-pattern/issues"
   },
+  "engines": {
+    "node": ">= 8.0.0"
+  },
+  "contributors": [
+    {
+      "name": "Cesar Casas",
+      "email": "cesarcasas@bsdsolutions.com.ar"
+    }
+  ],
   "homepage": "https://github.com/lortmorris/universal-pattern#readme",
   "dependencies": {
     "body-parser": "^1.18.3",
+    "compression": "^1.7.3",
     "cors": "^2.8.4",
     "debug": "^3.1.0",
+    "express": "^4.16.3",
     "js-yaml": "^3.12.0",
     "lodash": "^4.17.10",
-    "mongojs": "^2.6.0",
-    "swagger-ui": "^3.18.0"
+    "mongojs": "^2.6.0"
   },
   "devDependencies": {
     "babel-eslint": "^8.2.6",

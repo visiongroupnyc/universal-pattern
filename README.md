@@ -1,22 +1,34 @@
 # Universal Pattern
 Universal Pattern is single and easy way to build professionals API using MongoDB and Node.js.
 
+This is a [Node.js](https://nodejs.org/en/) module available through the
+[npm registry](https://www.npmjs.com/).
+
+
 # Instalation
 ```bash
 $ npm install universal-pattern --save
 ```
 
 # Implementation
+First, create a new project using npm, and install required modules.
+
+```bash
+$ npm init
+$ npm install express config --save
+```
+
+## creating app.js
+Create the app.js file, and put this code inside.
+
 ```javascript
 const http = require('http');
 const express = require('express');
 const path = require('path');
 const config = require('config');
 const up = require('universal-pattern');
-
 const app = express();
 const server = http.createServer(app);
-
 
 up(app, {
   swagger: {
@@ -32,7 +44,8 @@ up(app, {
   .catch(err => console.error('Error initializing ', err));
 ```
 
-Now, create the folder 'swagger' and put into it the first yaml file.
+## Creating auditreport.yaml
+Now, create the folder 'swagger' and put into it the first yaml file (e.g auditreport.yaml)
 
 ```yaml
 paths:
@@ -140,5 +153,27 @@ definitions:
         maxLength: 24
       comment:
         type: string
+```
 
+## Runing example.
+Finally, run the first UP App.
+
+```bash
+$ node app.js
+```
+Open your browser and go to (http://localhost:5000)
+
+
+# Options object
+```javascript
+swagger: { // Swagger property, required.
+  baseDoc: config.get('basePath'), // this is the baseDoc, is a default initial folder path.
+  host: config.get('host'), // what is the actual host?
+  folder: path.join(process.cwd(), 'swagger'), // the folder with yamls files
+},
+compress: false, // is true, the add compression mws into app. Default is false
+cors: false, // is true, add cors into header response. Default is false
+database: { // the database (mongodb) properties
+  uri: config.get('connection.mongodb.uri'), // database (mongodb) uri connection string
+},
 ```

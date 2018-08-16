@@ -116,9 +116,6 @@ const services = (Application) => {
         db[collection].update({
           _id: db.ObjectId(_id),
         }, query, (err, doc) => {
-          if (collection === 'users') this.SyncData.users(collection, _id);
-          if (collection === 'dishes') this.SyncData.dishes(collection, _id);
-          if (collection === 'restaurants') this.SyncData.restaurants(collection, _id);
           if (err) return reject(err);
           return resolve(doc);
         });
