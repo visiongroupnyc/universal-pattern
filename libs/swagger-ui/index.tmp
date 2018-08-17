@@ -40,7 +40,7 @@
 
       // Build a system
       const ui = SwaggerUIBundle({
-        url: "/---private--access-to-api-doc---",
+        url: "[[URL]]",
         dom_id: '#swagger-ui',
         deepLinking: true,
         presets: [
@@ -51,7 +51,7 @@
           SwaggerUIBundle.plugins.DownloadUrl
         ],
         layout: "StandaloneLayout"
-      })
+      });
 
       window.ui = ui
     }

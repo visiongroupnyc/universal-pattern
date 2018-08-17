@@ -29,6 +29,18 @@ const universalPattern = (app = express(), options = {}) => {
       host: 'localhost',
       apiDocs: 'api-docs',
       folder: path.join(__dirname, './swagger'),
+      info: {
+        version: 1.0,
+        title: 'Server API',
+        termsOfService: 'http://www.website.com/terms',
+        contact: {
+          email: 'cesarcasas@bsdsolutions.com.ar',
+        },
+        license: {
+          name: 'Apache 2.0',
+          url: 'http://www.apache.org/licenses/LICENSE-2.0.html',
+        },
+      },
     },
     compress: false,
     cors: false,
@@ -64,10 +76,14 @@ const universalPattern = (app = express(), options = {}) => {
       .map(file => yaml.safeLoad(file))
       .reduce((acc, current) => lodash.merge(acc, current), {});
 
-    UP.swagger = { ...yamlContent };
+    UP.swagger = lodash.merge({ ...yamlContent }, localOptions.swagger, { basePath: localOptions.swagger.baseDoc });
+
     app.use(`${localOptions.swagger.baseDoc}/docs/`, express.static(`${__dirname}/libs/swagger-ui`));
+    app.use(`${localOptions.swagger.baseDoc}/docs/`, (req, res) => {
+      const content = fs.readFileSync(`${__dirname}/libs/swagger-ui/index.tmp`).toString();
+      res.end(content.replace('[[URL]]', `${localOptions.swagger.baseDoc}/api-docs`));
+    });
     app.use(`${localOptions.swagger.baseDoc}/api-docs`, (req, res) => res.json(UP.swagger));
-    app.use('/---private--access-to-api-doc---', (req, res) => res.json(UP.swagger));
     app.use(swaggerMetadata(UP));
     paginate(UP);
     UP.services = services(UP);
