@@ -95,7 +95,7 @@ const controllers = (Application) => {
       }
     },
     'universal.search': async (req, res, next) => {
-      debug('.search called');
+      debug('.search called: ', req.swagger.params);
       let q = req.swagger.params.q.value;
       let sorting = req.swagger.params.sorting.value;
       const page = req.swagger.params.page.value;

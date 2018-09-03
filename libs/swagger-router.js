@@ -12,8 +12,11 @@ const swaggerRouter = (Application) => {
             throw new Error(`Handler not found: ${props['x-swagger-router-controller']}`);
           };
           const handler = controllers[props['x-swagger-router-controller']] || cbError;
-          app[method](path, async (req, res, next) => {
+          const basePath = swagger.basePath.split(':').shift().replace('http://', '').replace('https://', '');
+
+          app[method](`${basePath}${path}`, (req, res, next) => {
             try {
+              console.info('data: ', req.query);
               handler(req, res, (err) => {
                 if (err) {
                   debug('Controller catch Error: ', err);
@@ -27,6 +30,7 @@ const swaggerRouter = (Application) => {
                 }
               });
             } catch (err) {
+              debug('Error: ', err);
               res.status(500).end(err.toString());
             }
           });

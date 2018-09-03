@@ -22,6 +22,7 @@ const getModule = url => url.replace('/', '')
   .split('/')
   .shift();
 
+
 const universalPattern = (app = express(), options = {}) => {
   const localOptions = lodash.merge({
     swagger: {
