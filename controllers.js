@@ -4,19 +4,9 @@ const controllers = (Application) => {
   const { services, subcontrollers, db } = Application;
   return {
     'universal.insert': async (req, res, next) => {
-      debug('.insert called: ');
+      debug('.insert called: ', req.swagger.params.modeldata.value);
       const params = req.swagger.params.modeldata.value;
       params.added = new Date();
-      if (req.userData) {
-        params.user = {
-          nickname: req.userData.nickname,
-          _id: req.userData._id.toString(),
-          profilePhoto: req.userData.profilePhoto,
-          firstName: req.userData.firstName,
-          lastName: req.userData.lastName,
-        };
-      }
-
       if (params.startAt) {
         params.startAt = new Date(params.startAt);
       }
@@ -26,10 +16,8 @@ const controllers = (Application) => {
       }
 
       try {
-        const data = await subcontrollers(req, res, Application, 'beforeInsert');
-        const doc = await services.insert(req.swagger.apiPath, data);
-        const dataToResponse = await subcontrollers(req, res, Application, 'afterInsert', doc);
-        return res.json(dataToResponse);
+        const doc = await services.insert(req.swagger.apiPath, params);
+        return res.json(doc);
       } catch (err) {
         return next(err);
       }
@@ -38,10 +26,8 @@ const controllers = (Application) => {
     'universal.insertOrCount': async (req, res, next) => {
       const params = req.swagger.params.modeldata.value;
       try {
-        const data = await subcontrollers(req, res, Application, 'beforeInsert', params);
-        const doc = await services.insertOrCount(req.swagger.apiPath, data);
-        const dataToResponse = await subcontrollers(req, res, Application, 'afterInsert', doc);
-        return res.json(dataToResponse);
+        const doc = await services.insertOrCount(req.swagger.apiPath, params);
+        return res.json(doc);
       } catch (err) {
         return next(err);
       }
@@ -52,9 +38,7 @@ const controllers = (Application) => {
       delete data._id;
       debug('.update called: ', _id, data);
       try {
-        await subcontrollers(req, res, Application, 'beforeUpdate', data);
         const result = await services.update(req.swagger.apiPath, _id, data);
-        await subcontrollers(req, res, Application, 'afterUpdate', result);
         return res.json(result);
       } catch (err) {
         return next(err);
@@ -63,11 +47,8 @@ const controllers = (Application) => {
     'universal.remove': async (req, res, next) => {
       debug('.remove called');
       const _id = req.swagger.params._id.value;
-
       try {
-        await subcontrollers(req, res, Application, 'beforeRemove', { _id });
         const doc = await services.remove(req.swagger.apiPath, _id);
-        await subcontrollers(req, res, Application, 'afterRemove', { _id });
         return res.json(doc);
       } catch (err) {
         return next(err);
@@ -86,10 +67,8 @@ const controllers = (Application) => {
       debug('.findOne called');
       const data = req.swagger.params.data.value;
       try {
-        const doc = await subcontrollers(req, res, Application, 'beforeFindone', data);
-        const result = await services.findOne(req.swagger.apiPath, doc);
-        const dataToResponse = await subcontrollers(req, res, Application, 'afterFindone', result);
-        return res.json(dataToResponse);
+        const result = await services.findOne(req.swagger.apiPath, data);
+        return res.json(result);
       } catch (err) {
         return next(err);
       }
@@ -210,8 +189,7 @@ const controllers = (Application) => {
         }, res);
 
         const result = await services.search(req.swagger.apiPath, {}, newparams, populateFields);
-        const resultFinal = await subcontrollers(req, res, Application, 'afterGet', result);
-        return res.json(resultFinal);
+        return res.json(result);
       } catch (err) {
         return next(err);
       }

@@ -45,7 +45,6 @@ const universalPattern = (app = express(), options = {}) => {
     },
     compress: false,
     cors: false,
-    subcontrollers: {},
     database: {
       uri: 'mongodb://localhost:27017/up',
     },

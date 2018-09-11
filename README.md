@@ -20,6 +20,24 @@ $ npm install express config --save
 
 ## creating app.js
 Create the app.js file, and put this code inside.
+Important: this project use 'config' npm package. Install this first. Then, create 'config' folder and default.json file into it.
+
+default.json example:
+```javascript
+{
+  "basePath": "/auditor",
+  "host": "localhost",
+  "port": 5000,
+  "name": "up-example",
+  "version": "0.1",
+  "connection": {
+    "mongodb": {
+      "uri": "mongodb://127.0.0.1/up"
+    }
+  }
+}
+
+```
 
 ```javascript
 const http = require('http');
@@ -27,20 +45,36 @@ const express = require('express');
 const path = require('path');
 const config = require('config');
 const up = require('universal-pattern');
+
+const port = config.get('port');
 const app = express();
 const server = http.createServer(app);
 
 up(app, {
   swagger: {
     baseDoc: config.get('basePath'),
-    host: config.get('host'),
+    host: `${config.get('host')}:${config.get('port')}`,
     folder: path.join(process.cwd(), 'swagger'),
+    info: {
+      version: 10.0,
+      title: 'Universal Pattern Example',
+      termsOfService: 'www.domain.com/terms',
+      contact: {
+        email: 'cesarcasas@bsdsolutions.com.ar',
+      },
+      license: {
+        name: 'UP',
+        url: 'http://www.apache.org/licenses/LICENSE-2.0.html',
+      },
+    },
   },
+  compress: true,
+  cors: true,
   database: {
     uri: config.get('connection.mongodb.uri'),
   },
 })
-  .then(up => server.listen(5000))
+  .then(() => server.listen(port, () => console.info(`listen *:${port}`)))
   .catch(err => console.error('Error initializing ', err));
 ```
 
@@ -161,7 +195,7 @@ Finally, run the first UP App.
 ```bash
 $ node app.js
 ```
-Open your browser and go to (http://localhost:5000)
+Open your browser and go to (http://localhost:5000/auditor/docs)
 
 
 # Options object

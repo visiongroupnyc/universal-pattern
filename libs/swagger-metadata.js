@@ -1,7 +1,6 @@
 const debug = require('debug')('universal-pattern:libs:swagger-metadata');
 
 const getParameters = (swagger, url, method) => {
-  debug('getParameters called: ', url, method);
   const globalParameters = swagger.parameters;
   const localParameters = swagger.paths[url][method].parameters;
   if (localParameters) {
@@ -27,24 +26,27 @@ const getParameters = (swagger, url, method) => {
 
 
 const validString = (req, method, prop, meta) => {
-  debug('validString called: ', prop, meta);
-  let n = null;
+  let n;
+  const p = req[method][prop];
+  if (meta.required && !p) throw new Error(`required ${meta.name}`);
   if (meta.format === 'date') {
-    n = new Date(req[method][prop]);
-    if (n.toString() === 'Invalid Date') throw new Error('Invalid date format');
+    n = new Date(p);
+    if (n.toString() === 'Invalid Date') throw new Error(`Invalid date format: ${meta.name}`);
     return n;
   }
-  return n.toString();
+  return p || meta.default;
 };
 
 const validNumber = (req, method, prop, meta) => {
-  debug('validNumber called: ', prop, meta);
-  let n = null;
-  if (meta.format === 'float') n = parseFloat(req[method][prop], 10);
-  else n = parseInt(req[method][prop], 10);
-
-  if (Number.isNaN(n)) throw new Error('Invalid number format');
-  return n;
+  let n;
+  const p = req[method][prop];
+  if (meta.required && !p) throw new Error(`required ${meta.name}`);
+  if (p) {
+    if (meta.format === 'float') n = parseFloat(p, 10);
+    else n = parseInt(p, 10);
+    if (Number.isNaN(n)) throw new Error('Invalid number format');
+  }
+  return n || meta.default || p;
 };
 
 const validObject = (req, method, prop, meta) => {
@@ -57,24 +59,52 @@ const validObject = (req, method, prop, meta) => {
   return req.body;
 };
 
-const validateParameters = (req, params) => {
-  req.swagger.params = {};
+const validateParameters = (req, params, level = {}) => {
+  debug('validateParameters called: ', params, level);
   Object.entries(params)
     .forEach(([k, v]) => {
       try {
-        let method = v.in === 'header' ? 'headers' : v.in;
-        if (v.schema) method = 'post';
-        // let i = false;
-        if (v.schema) return validateParameters(req, v.schema);
-        if (v.type === 'number') req.swagger.params[k].value = validNumber(req, method, k, v);
-        else if (v.type === 'string') req.swagger.params[k].value = validString(req, method, k, v);
-        else if (v.type === 'object') req.swagger.params[k].value = validObject(req, method, k, v);
-        else req.swagger.params[k].value = req[method][k];
-        return req.swagger.params;
+        let method = v.in === 'header' ? 'headers' : v.in || 'body';
+        if (v.schema) {
+          method = 'body';
+        }
+        if (v.schema && v.schema.type === 'object') {
+          level[k] = { value: {} };
+          return validateParameters(req, v.schema.properties, level[k].value);
+        }
+        if (v.type === 'number') {
+          const value = validNumber(req, method, k, v);
+          if (value) {
+            if (method === 'body') Object.assign(level, { [k]: value });
+            else Object.assign(level, { [k]: { value } });
+          }
+          return level;
+        }
+        if (v.type === 'string') {
+          const value = validString(req, method, k, v);
+          if (value) {
+            if (method === 'body') Object.assign(level, { [k]: value });
+            else Object.assign(level, { [k]: { value } });
+          }
+          return level;
+        }
+        if (v.type === 'object') {
+          const value = validObject(req, method, k, v);
+          if (value) {
+            if (method === 'body') Object.assign(level, { [k]: value });
+            else Object.assign(level, { [k]: { value } });
+            return level;
+          }
+        }
+
+        Object.assign(level, { [k]: { value: req[method][k] } });
+        return level;
       } catch (err) {
-        return null;
+        debug('invalid model data validation: ', err);
+        throw Error(`invalid model data validation: ${err.toString()}`);
       }
     });
+  return level;
 };
 
 const swaggerMetadata = (Application) => {
@@ -93,11 +123,15 @@ const swaggerMetadata = (Application) => {
     debug('swaggerMetadata called: ', req.url, url, method);
 
     if (swagger.paths[url] && swagger.paths[url][method]) {
-      const data = getParameters(swagger, url, method, req);
-      const isValid = validateParameters(req, data);
-      if (isValid) return next();
-      debug('invalid request: ', req.url, req.swagger);
-      return res.status(400).end(`Invalid parameters: ${JSON.stringify(req.swagger)}`);
+      try {
+        const data = getParameters(swagger, url, method, req);
+        validateParameters(req, data, req.swagger.params);
+        debug('params formatted: ', req.swagger.params);
+        return next();
+      } catch (error) {
+        debug('invalid request: ', req.url, req.swagger, error);
+        return res.status(400).end(`Invalid parameters: ${error}`);
+      }
     }
     return next();
   };
