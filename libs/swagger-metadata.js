@@ -26,15 +26,24 @@ const getParameters = (swagger, url, method) => {
 
 
 const validString = (req, method, prop, meta) => {
+  debug('validString called: ', method, prop, meta);
   let n;
   const p = req[method][prop];
-  if (meta.required && !p) throw new Error(`required ${meta.name}`);
+  if (meta.required && !p) throw new Error(`required ${prop}`);
   if (meta.format === 'date') {
     n = new Date(p);
-    if (n.toString() === 'Invalid Date') throw new Error(`Invalid date format: ${meta.name}`);
+    if (n.toString() === 'Invalid Date') throw new Error(`Invalid date format: ${prop}`);
     return n;
   }
-  return p || meta.default;
+
+  if (p) {
+    debug('asdasd: ', meta.minLength, p.length);
+    if (meta.enum && meta.enum.indexOf(p) === -1) throw new Error(`Invalid value enum: ${prop}`);
+    if (meta.minLength && meta.minLength > p.length) throw new Error(`Invalid minLength: ${prop} (${p.length})`);
+    if (meta.maxLength && meta.maxLength < p.length) throw new Error(`Invalid maxLength: ${prop} (${p.length})`);
+    return p;
+  }
+  return meta.default;
 };
 
 const validNumber = (req, method, prop, meta) => {

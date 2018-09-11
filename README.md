@@ -74,7 +74,7 @@ up(app, {
     uri: config.get('connection.mongodb.uri'),
   },
 })
-  .then(() => server.listen(port, () => console.info(`listen *:${port}`)))
+  .then((upInstance) => server.listen(port, () => console.info(`listen *:${port}`)))
   .catch(err => console.error('Error initializing ', err));
 ```
 
@@ -210,4 +210,12 @@ cors: false, // is true, add cors into header response. Default is false
 database: { // the database (mongodb) properties
   uri: config.get('connection.mongodb.uri'), // database (mongodb) uri connection string
 },
+```
+
+# Hooks
+
+```javascript
+upInstance.addHook('/endpoint', 'beforeInsert', async (req, params) => {
+  return Promise.resolve(params);
+});
 ```

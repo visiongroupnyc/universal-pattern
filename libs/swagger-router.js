@@ -23,7 +23,7 @@ const swaggerRouter = (Application) => {
                   debug('Controller catch Error: ', err);
                   res.status(503).json({
                     code: 'controller_error_catched',
-                    message: err,
+                    message: err.toString(),
                     success: false,
                   }).end();
                 } else {

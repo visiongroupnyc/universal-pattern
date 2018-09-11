@@ -5,7 +5,7 @@ const controllers = (Application) => {
   return {
     'universal.insert': async (req, res, next) => {
       debug('.insert called: ', req.swagger.params.modeldata.value);
-      const params = req.swagger.params.modeldata.value;
+      let params = req.swagger.params.modeldata.value;
       params.added = new Date();
       if (params.startAt) {
         params.startAt = new Date(params.startAt);
@@ -16,6 +16,9 @@ const controllers = (Application) => {
       }
 
       try {
+        if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].beforeInsert) {
+          params = await Application.hooks[req.swagger.apiPath].beforeInsert(req, params, Application);
+        }
         const doc = await services.insert(req.swagger.apiPath, params);
         return res.json(doc);
       } catch (err) {

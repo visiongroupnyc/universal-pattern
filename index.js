@@ -7,10 +7,10 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const compression = require('compression');
 const cors = require('cors');
+const debug = require('debug')('universal-pattern');
 const paginate = require('./libs/paginate');
 const services = require('./services');
 const controllers = require('./controllers');
-const subcontrollersHandlers = require('./subcontrollers');
 const swaggerMetadata = require('./libs/swagger-metadata');
 const swaggerRouter = require('./libs/swagger-router');
 
@@ -22,6 +22,12 @@ const getModule = url => url.replace('/', '')
   .split('/')
   .shift();
 
+
+const addHook = UP => (endpoint, method, cb) => {
+  debug('adding hook: ', endpoint, method);
+  if (!UP.hooks[endpoint]) UP.hooks[endpoint] = {};
+  UP.hooks[endpoint][method] = cb;
+};
 
 const universalPattern = (app = express(), options = {}) => {
   const localOptions = lodash.merge({
@@ -87,10 +93,10 @@ const universalPattern = (app = express(), options = {}) => {
     app.use(swaggerMetadata(UP));
     paginate(UP);
     UP.services = services(UP);
-    UP.subcontrollers = subcontrollersHandlers(UP);
     UP.controllers = controllers(UP);
+    UP.hooks = {};
     swaggerRouter(UP);
-
+    UP.addHook = addHook(UP);
     // compression
     return resolve(UP);
   });
