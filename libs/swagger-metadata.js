@@ -83,18 +83,16 @@ const validateParameters = (req, params, level = {}) => {
         }
         if (v.type === 'number') {
           const value = validNumber(req, method, k, v);
-          if (value) {
-            if (method === 'body') Object.assign(level, { [k]: value });
-            else Object.assign(level, { [k]: { value } });
-          }
+          if (method === 'body') {
+            if (value) Object.assign(level, { [k]: value });
+          } else Object.assign(level, { [k]: { value } });
           return level;
         }
         if (v.type === 'string') {
           const value = validString(req, method, k, v);
-          if (value) {
-            if (method === 'body') Object.assign(level, { [k]: value });
-            else Object.assign(level, { [k]: { value } });
-          }
+          if (method === 'body') {
+            if (value) Object.assign(level, { [k]: value });
+          } else Object.assign(level, { [k]: { value } });
           return level;
         }
         if (v.type === 'object') {

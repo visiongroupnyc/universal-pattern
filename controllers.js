@@ -184,14 +184,12 @@ const controllers = (Application) => {
       debug('====> query for run: ', q, sorting);
 
       try {
-        const newparams = await subcontrollers(req, res, Application, 'beforeGet', {
+        const result = await services.search(req.swagger.apiPath, {}, {
           page,
           limit,
           q,
           sorting,
-        }, res);
-
-        const result = await services.search(req.swagger.apiPath, {}, newparams, populateFields);
+        }, populateFields);
         return res.json(result);
       } catch (err) {
         return next(err);
