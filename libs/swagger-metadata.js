@@ -37,7 +37,6 @@ const validString = (req, method, prop, meta) => {
   }
 
   if (p) {
-    debug('asdasd: ', meta.minLength, p.length);
     if (meta.enum && meta.enum.indexOf(p) === -1) throw new Error(`Invalid value enum: ${prop}`);
     if (meta.minLength && meta.minLength > p.length) throw new Error(`Invalid minLength: ${prop} (${p.length})`);
     if (meta.maxLength && meta.maxLength < p.length) throw new Error(`Invalid maxLength: ${prop} (${p.length})`);
@@ -63,7 +62,6 @@ const validObject = (req, method, prop, meta) => {
   if (method === 'post') {
     const { body } = req;
     const { schema } = meta;
-    debug('<>>>> ', body, schema);
   }
   return req.body;
 };

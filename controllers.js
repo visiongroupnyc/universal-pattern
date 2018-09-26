@@ -1,7 +1,7 @@
 const debug = require('debug')('universal-pattern:controllers');
 
 const controllers = (Application) => {
-  const { services, subcontrollers, db } = Application;
+  const { services, db } = Application;
   return {
     'universal.insert': async (req, res, next) => {
       debug('.insert called: ', req.swagger.params.modeldata.value);
@@ -19,7 +19,10 @@ const controllers = (Application) => {
         if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].beforeInsert) {
           params = await Application.hooks[req.swagger.apiPath].beforeInsert(req, params, Application);
         }
-        const doc = await services.insert(req.swagger.apiPath, params);
+        let doc = await services.insert(req.swagger.apiPath, params);
+        if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].afterInsert) {
+          doc = await Application.hooks[req.swagger.apiPath].afterInsert(req, doc, Application);
+        }
         return res.json(doc);
       } catch (err) {
         return next(err);
@@ -36,13 +39,20 @@ const controllers = (Application) => {
       }
     },
     'universal.update': async (req, res, next) => {
-      const data = req.swagger.params.modeldata.value;
+      let data = req.swagger.params.modeldata.value;
       const { _id } = data;
       delete data._id;
       debug('.update called: ', _id, data);
       try {
+        if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].beforeUpdate) {
+          data = await Application.hooks[req.swagger.apiPath].beforeInsert(req, data, Application);
+        }
         const result = await services.update(req.swagger.apiPath, _id, data);
-        return res.json(result);
+        let updateDocument = await services.findOne(req.swagger.apiPath, _id);
+        if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].afterUpdate) {
+          updateDocument = await Application.hooks[req.swagger.apiPath].afterUpdate(req, { ...updateDocument, result }, Application);
+        }
+        return res.json({ ...updateDocument, result });
       } catch (err) {
         return next(err);
       }
@@ -51,8 +61,16 @@ const controllers = (Application) => {
       debug('.remove called');
       const _id = req.swagger.params._id.value;
       try {
-        const doc = await services.remove(req.swagger.apiPath, _id);
-        return res.json(doc);
+        if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].beforeRemove) {
+          await Application.hooks[req.swagger.apiPath].beforeRemove(req, _id, Application);
+        }
+        let removedDocument = await services.findOne(req.swagger.apiPath, _id);
+        const result = await services.remove(req.swagger.apiPath, _id);
+
+        if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].afterRemove) {
+          removedDocument = await Application.hooks[req.swagger.apiPath].afterRemove(req, { ...removedDocument, result }, Application);
+        }
+        return res.json({ ...removedDocument, result });
       } catch (err) {
         return next(err);
       }
@@ -84,6 +102,7 @@ const controllers = (Application) => {
       const limit = req.swagger.params.limit.value;
       const fields = req.swagger.params.fields.value;
       let coordinates = null;
+
 
       if (req.swagger.params.coordinates) coordinates = req.swagger.params.coordinates.value;
 
@@ -161,10 +180,7 @@ const controllers = (Application) => {
           };
         }
       }
-
-      // remove coordinates if criterial exists
       if (q && typeof q.criterial !== 'undefined') delete q.location;
-
       if (sorting) {
         const props = sorting.split(',');
         sorting = {};
@@ -181,15 +197,21 @@ const controllers = (Application) => {
         });
       }
       req.q = q;
-      debug('====> query for run: ', q, sorting);
-
       try {
-        const result = await services.search(req.swagger.apiPath, {}, {
+        const searchParams = {
           page,
           limit,
           q,
           sorting,
-        }, populateFields);
+        };
+        if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].beforeSearch) {
+          q = await Application.hooks[req.swagger.apiPath].beforeSearch(req, searchParams, Application);
+        }
+
+        let result = await services.search(req.swagger.apiPath, {}, searchParams, populateFields);
+        if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].afterUpdate) {
+          result = await Application.hooks[req.swagger.apiPath].afterUpdate(req, result, Application);
+        }
         return res.json(result);
       } catch (err) {
         return next(err);

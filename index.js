@@ -29,6 +29,12 @@ const addHook = UP => (endpoint, method, cb) => {
   UP.hooks[endpoint][method] = cb;
 };
 
+const registerController = UP => (name, controller) => {
+  debug('reginstering controller: ', name);
+  if (name in UP.controllers) throw Error(`Controller ${name} already register`);
+  UP.controllers[name] = controller;
+};
+
 const universalPattern = (app = express(), options = {}) => {
   const localOptions = lodash.merge({
     swagger: {
@@ -67,7 +73,6 @@ const universalPattern = (app = express(), options = {}) => {
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(bodyParser.json());
 
-  // adding defaults mws
   if (!hasMWS(app, 'compression') && localOptions.compress) app.use(compression({ level: 9 }));
   if (!hasMWS(app, 'cors') && localOptions.compress) app.use(cors());
 
@@ -97,7 +102,7 @@ const universalPattern = (app = express(), options = {}) => {
     UP.hooks = {};
     swaggerRouter(UP);
     UP.addHook = addHook(UP);
-    // compression
+    UP.registerController = registerController(UP);
     return resolve(UP);
   });
 };

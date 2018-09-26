@@ -10,15 +10,15 @@ const swaggerRouter = (Application) => {
           const cbError = () => {
             throw new Error(`Handler not found: ${props['x-swagger-router-controller']}`);
           };
-          const handler = controllers[props['x-swagger-router-controller']] || cbError;
+          const handler = () => controllers[props['x-swagger-router-controller']] || cbError;
           const basePath = swagger.basePath.replace('http://', '').replace('https://', '');
           const finalpath = `${basePath}${path}`;
 
-          debug('registering: ', method, finalpath, props['x-swagger-router-controller'], controllers);
+          debug('registering: ', method, finalpath, props['x-swagger-router-controller']);
           app[method](finalpath, (req, res, next) => {
             try {
               debug('request: ', req.method, req.url, req.query);
-              handler(req, res, (err) => {
+              handler()(req, res, (err) => {
                 if (err) {
                   debug('Controller catch Error: ', err);
                   res.status(503).json({
