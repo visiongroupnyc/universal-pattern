@@ -25,14 +25,14 @@ Important: this project use 'config' npm package. Install this first. Then, crea
 default.json example:
 ```javascript
 {
-  "basePath": "/auditor",
+  "basePath": "/services",
   "host": "localhost",
   "port": 5000,
   "name": "up-example",
   "version": "0.1",
   "connection": {
     "mongodb": {
-      "uri": "mongodb://127.0.0.1/up"
+      "uri": "mongodb://127.0.0.1/uptest"
     }
   }
 }
@@ -63,7 +63,7 @@ up(app, {
         email: 'cesarcasas@bsdsolutions.com.ar',
       },
       license: {
-        name: 'UP',
+        name: 'Apache',
         url: 'http://www.apache.org/licenses/LICENSE-2.0.html',
       },
     },
@@ -78,8 +78,8 @@ up(app, {
   .catch(err => console.error('Error initializing ', err));
 ```
 
-## Creating auditreport.yaml
-Now, create the folder 'swagger' and put into it the first yaml file (e.g auditreport.yaml)
+## Creating carts.yaml
+Now, create the folder 'swagger' and put into it the first yaml file (e.g carts.yaml)
 
 ```yaml
 paths:
