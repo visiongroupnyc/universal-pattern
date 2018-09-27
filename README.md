@@ -83,10 +83,10 @@ Now, create the folder 'swagger' and put into it the first yaml file (e.g auditr
 
 ```yaml
 paths:
-  /auditreport:
+  /carts:
     get:
       tags:
-        - auditor
+        - carts
       summary: reports list
       x-swagger-router-controller: universal.search
       parameters:
@@ -95,7 +95,6 @@ paths:
         - $ref: '#/parameters/sorting'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/fields'
-        - $ref: '#/parameters/apikey'
         - name: coordinates
           in: query
           type: string
@@ -106,87 +105,74 @@ paths:
         '200':
           description: reports
           schema:
-            $ref: '#/definitions/auditreport'
+            $ref: '#/definitions/cart'
     put:
       tags:
-        - auditor
-      summary: insert new report
+        - carts
+      summary: insert new cart
       x-swagger-router-controller: universal.insert
       parameters:
-        - $ref: '#/parameters/apikey'
         - name: modeldata
           in: body
           required: true
           schema:
-            $ref: '#/definitions/auditreport'
+            $ref: '#/definitions/cart'
       responses:
         '200':
-          description: report added
+          description: cart added
           schema:
-            $ref: '#/definitions/auditreport'
+            $ref: '#/definitions/cart'
 
     delete:
       tags:
-        - auditor
-      summary: delete report
+        - carts
+      summary: delete cart
       x-swagger-router-controller: universal.remove
       parameters:
-        - $ref: '#/parameters/apikey'
         - name: _id
           in: query
           required: true
           type: string
       responses:
         '200':
-          description: deleted report
+          description: deleted cart
           schema:
-            $ref: '#/definitions/auditreport'
+            $ref: '#/definitions/cart'
 
     patch:
       tags:
-        - auditor
-      summary: options report
+        - carts
+      summary: for updated cart document
       x-swagger-router-controller: universal.update
       parameters:
-        - $ref: '#/parameters/apikey'
         - name: modeldata
           in: body
           required: true
           schema:
-            $ref: '#/definitions/auditreport'
+            $ref: '#/definitions/cart'
       responses:
         '200':
-          description: updated report
+          description: updated cart
           schema:
-            $ref: '#/definitions/auditreport'
+            $ref: '#/definitions/cart'
 
 definitions:
-  auditreport:
+  cart:
     type: object
     properties:
-      _id:
+      name:
         type: string
-        minLength: 24
-        maxLength: 24
-      target:
+      color:
         type: string
         enum:
-          - imagen
-          - dish
-          - restaurant
-          - user
-          - comment
-          - event
-      userId:
-        type: string
-        minLength: 24
-        maxLength: 24
-      targetId:
-        type: string
-        minLength: 24
-        maxLength: 24
+          - black
+          - white
+          - blue
+          - green
+        required: true
       comment:
         type: string
+
 ```
 
 ## Runing example.
@@ -261,3 +247,8 @@ upInstance.registerController('module.methodControllerName', (req, res, next) =>
   res.json({ ok: true });
 });
 ```
+
+
+# Example
+
+For a real example, see (https://github.com/lortmorris/up-example)

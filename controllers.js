@@ -45,7 +45,7 @@ const controllers = (Application) => {
       debug('.update called: ', _id, data);
       try {
         if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].beforeUpdate) {
-          data = await Application.hooks[req.swagger.apiPath].beforeInsert(req, data, Application);
+          data = await Application.hooks[req.swagger.apiPath].beforeUpdate(req, data, Application);
         }
         const result = await services.update(req.swagger.apiPath, _id, data);
         let updateDocument = await services.findOne(req.swagger.apiPath, _id);
@@ -209,8 +209,8 @@ const controllers = (Application) => {
         }
 
         let result = await services.search(req.swagger.apiPath, {}, searchParams, populateFields);
-        if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].afterUpdate) {
-          result = await Application.hooks[req.swagger.apiPath].afterUpdate(req, result, Application);
+        if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].afterSearch) {
+          result = await Application.hooks[req.swagger.apiPath].afterSearch(req, result, Application);
         }
         return res.json(result);
       } catch (err) {
