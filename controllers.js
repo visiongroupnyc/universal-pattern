@@ -16,10 +16,16 @@ const controllers = (Application) => {
       }
 
       try {
+        if (Application.hooks['*'] && Application.hooks['*'].beforeInsert) {
+          params = await Application.hooks['*'].beforeInsert(req, params, Application);
+        }
         if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].beforeInsert) {
           params = await Application.hooks[req.swagger.apiPath].beforeInsert(req, params, Application);
         }
         let doc = await services.insert(req.swagger.apiPath, params);
+        if (Application.hooks['*'] && Application.hooks['*'].afterInsert) {
+          params = await Application.hooks['*'].afterInsert(req, params, Application);
+        }
         if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].afterInsert) {
           doc = await Application.hooks[req.swagger.apiPath].afterInsert(req, doc, Application);
         }
@@ -44,32 +50,50 @@ const controllers = (Application) => {
       delete data._id;
       debug('.update called: ', _id, data);
       try {
+        if (Application.hooks['*'] && Application.hooks['*'].beforeUpdate) {
+          data = await Application.hooks['*'].beforeUpdate(req, data, Application);
+        }
+
         if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].beforeUpdate) {
           data = await Application.hooks[req.swagger.apiPath].beforeUpdate(req, data, Application);
         }
+
         const result = await services.update(req.swagger.apiPath, _id, data);
         let updateDocument = await services.findOne(req.swagger.apiPath, _id);
+
+        if (Application.hooks['*'] && Application.hooks['*'].afterUpdate) {
+          updateDocument = await Application.hooks['*'].afterUpdate(req, { ...updateDocument, result }, Application);
+        }
         if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].afterUpdate) {
           updateDocument = await Application.hooks[req.swagger.apiPath].afterUpdate(req, { ...updateDocument, result }, Application);
         }
+
         return res.json({ ...updateDocument, result });
       } catch (err) {
         return next(err);
       }
     },
     'universal.remove': async (req, res, next) => {
-      debug('.remove called');
       const _id = req.swagger.params._id.value;
+      debug('.remove called: ', _id);
       try {
+        if (Application.hooks['*'] && Application.hooks['*'].beforeRemove) {
+          await Application.hooks['*'].beforeRemove(req, _id, Application);
+        }
         if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].beforeRemove) {
           await Application.hooks[req.swagger.apiPath].beforeRemove(req, _id, Application);
         }
-        let removedDocument = await services.findOne(req.swagger.apiPath, _id);
+
+        let removedDocument = await services.findOne(req.swagger.apiPath, { _id: db.ObjectId(_id) });
         const result = await services.remove(req.swagger.apiPath, _id);
 
+        if (Application.hooks['*'] && Application.hooks['*'].afterRemove) {
+          removedDocument = await Application.hooks['*'].afterRemove(req, { ...removedDocument, result }, Application);
+        }
         if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].afterRemove) {
           removedDocument = await Application.hooks[req.swagger.apiPath].afterRemove(req, { ...removedDocument, result }, Application);
         }
+
         return res.json({ ...removedDocument, result });
       } catch (err) {
         return next(err);
@@ -204,11 +228,17 @@ const controllers = (Application) => {
           q,
           sorting,
         };
+        if (Application.hooks['*'] && Application.hooks['*'].beforeSearch) {
+          q = await Application.hooks['*'].beforeSearch(req, searchParams, Application);
+        }
         if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].beforeSearch) {
           q = await Application.hooks[req.swagger.apiPath].beforeSearch(req, searchParams, Application);
         }
 
         let result = await services.search(req.swagger.apiPath, {}, searchParams, populateFields);
+        if (Application.hooks['*'] && Application.hooks['*'].afterSearch) {
+          result = await Application.hooks['*'].afterSearch(req, result, Application);
+        }
         if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].afterSearch) {
           result = await Application.hooks[req.swagger.apiPath].afterSearch(req, result, Application);
         }
