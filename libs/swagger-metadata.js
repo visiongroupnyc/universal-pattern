@@ -28,12 +28,23 @@ const getParameters = (swagger, url, method) => {
 const validString = (req, method, prop, meta) => {
   debug('validString called: ', method, prop, meta);
   let n;
+  const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   const p = req[method][prop];
-  if (meta.required && !p) throw new Error(`required ${prop}`);
+  if (meta.required && !p) throw new Error(`required string: ${prop}`);
   if (meta.format === 'date') {
     n = new Date(p);
     if (n.toString() === 'Invalid Date') throw new Error(`Invalid date format: ${prop}`);
     return n;
+  }
+
+  if (meta.format === 'email') {
+    if (!emailRegex.test(String(p).toLowerCase())) throw new Error(`Invalid email format: ${prop}`);
+    return String(p).toLowerCase();
+  }
+
+  if (meta['x-swagger-regex']) {
+    if (!RegExp(meta['x-swagger-regex']).test(p)) throw new Error(`Invalid x-swagger-regex: ${meta['x-swagger-regex']} ${prop}`);
+    return p;
   }
 
   if (p) {
@@ -46,9 +57,10 @@ const validString = (req, method, prop, meta) => {
 };
 
 const validNumber = (req, method, prop, meta) => {
+  debug('validNumber: ', prop, meta);
   let n;
   const p = req[method][prop];
-  if (meta.required && !p) throw new Error(`required ${meta.name}`);
+  if (meta.required && !p) throw new Error(`require number: ${prop}`);
   if (p) {
     if (meta.format === 'float') n = parseFloat(p, 10);
     else n = parseInt(p, 10);
