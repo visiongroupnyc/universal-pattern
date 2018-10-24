@@ -170,6 +170,17 @@ const services = (Application) => {
         });
       });
     },
+
+    distinct: async (endpoint, field = '_id', query = {}) => {
+      const collection = getModule(endpoint);
+      debug('.distinct called: ', collection, field, query);
+      return new Promise((resolve, reject) => {
+        db[collection].distinct(field, query, (err, docs) => {
+          if (err) return reject(err);
+          return resolve(docs);
+        });
+      });
+    },
     modify: async (collection, _id, query) => {
       debug('.modify called:', query);
       return new Promise((resolve, reject) => {

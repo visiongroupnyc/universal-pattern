@@ -125,6 +125,7 @@ const controllers = (Application) => {
       const page = req.swagger.params.page.value;
       const limit = req.swagger.params.limit.value;
       const fields = req.swagger.params.fields.value;
+      const distinct = req.swagger.params && req.swagger.params.distinct ? req.swagger.params.distinct.value : null;
       let coordinates = null;
 
 
@@ -235,7 +236,25 @@ const controllers = (Application) => {
           q = await Application.hooks[req.swagger.apiPath].beforeSearch(req, searchParams, Application);
         }
 
-        let result = await services.search(req.swagger.apiPath, {}, searchParams, populateFields);
+        let result = {};
+        if (distinct && distinct.length > 0) {
+          const ids = await services.distinct(req.swagger.apiPath, distinct, searchParams.q);
+          console.info('ids: ', ids);
+          const docs = await Promise.all(
+            ids.map(id => services.findOne(req.swagger.apiPath, { [distinct]: id }, {})),
+          );
+          result = {
+            docs,
+            page: 1,
+            limit: docs.length,
+            count: docs.length,
+            totalPages: 1,
+            distinct: true,
+          };
+        } else {
+          result = await services.search(req.swagger.apiPath, {}, searchParams, populateFields);
+        }
+
         if (Application.hooks['*'] && Application.hooks['*'].afterSearch) {
           result = await Application.hooks['*'].afterSearch(req, result, Application);
         }

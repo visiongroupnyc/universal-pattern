@@ -72,8 +72,8 @@ const validNumber = (req, method, prop, meta) => {
 const validObject = (req, method, prop, meta) => {
   debug('validObject called: ', prop, meta);
   if (method === 'post') {
-    const { body } = req;
-    const { schema } = meta;
+    // const { body } = req;
+    // const { schema } = meta;
   }
   return req.body;
 };
