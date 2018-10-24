@@ -100,7 +100,6 @@ paths:
           type: string
           default: "0,0,0"
           description: search by coordinates struct. long,lat,radius
-
       responses:
         '200':
           description: reports
@@ -197,6 +196,229 @@ database: { // the database (mongodb) properties
   uri: config.get('connection.mongodb.uri'), // database (mongodb) uri connection string
 },
 ```
+---
+# services methods.
+The services are available into 'service' prop of 'Universal Pattern', usually called upInstance.
+
+In all cases, the first argument is 'module name'. Remember, into UP the module name is the first name after '/' in url.
+For example, for use the module 'users', the argument is '/users'.
+
+## search
+search into collection.
+
+`search(module [,query, page, fields]);`
+
+return Promise with result.
+
+- `module`: string, the module name. Ex: '/users'
+- `query`: just a MongoDB query.
+- `page`: is a object with pagination and sorting properties:
+```
+{
+  limit: integer, // default is 30
+  page: integer, // default is 1
+  sorting: string // string with props separated by ',' ex: 'name:desc,age:asc'
+}
+```
+
+Example:
+```javascript
+const result = await upInstance.services.search('/users',
+{
+  age: { $gt: 5 },
+},
+{
+  page: 1,
+  limit: 10,
+  sorting: 'name:desc',
+});
+```
+## today
+Get the last 500 documents inserted today.
+
+`today(module);`
+
+- `module`: string, the modulo name.
+
+Example:
+```javascript
+  const logs = await upInstance.services.today('/logs');
+```
+
+## insert
+Insert a new document into module.
+
+`insert(module, document);`
+- `module`: string, the module name. Ex: '/users'
+- `document`: object, the document will be save.
+
+
+Example:
+```javascript
+  upInstance.services.insert('/logs', {
+    url: req.url,
+  });
+```
+`Important: The service insert will add 'added' prop.`
+
+## findOne
+Search the first document.
+
+`findOne(module, query, fields);``
+
+- `module`: string, the module name. Ex: '/users'
+- `query`: object, the mongoDB query.
+- `fields`: object, the props should be populate. If empty, return all document prop.
+
+Example:
+```javascript
+  const userData = await upInstance.service.findOne('/users', { _id: upInstance.db.ObjectId(userId) }, { name: 1, age: 1 });
+```
+
+## remove
+Remove document by id.
+
+`remove(module, id);`
+`
+- `module`: string, the module name. Ex: '/users'
+- `id`: string, the mongoDB document id.
+
+Example:
+```javascript
+  const removed = await upInstance.services.remove('/users', '5a1f3dabe8c5272a5f78f779');
+```
+
+## removeAll
+Remove all document when match with query.
+
+`removeAll(module, query);`
+- `module`: string, the module name. Ex: '/users'
+- `query`: object, the mongoDB query.
+
+```javascript
+  upInstance.services.removeAll('/logs', { added: { $lt: new Date() } });
+```
+
+## update
+Update document.
+`update(module, id, data[, opts = { updated: true, set: true }])`
+
+- `module`: string, the module name. Ex: '/users'
+- `id`: string, the document id.
+- `data`: object, the new props to assign.
+- `opts`: object, options:
+  - `updated`: boolean, if true, added or updated the prop updated. Default is true.
+  - `set`: boolean, if true, the method will add the $set operator. Default is true.
+
+
+Example:
+```javascript
+  const updated = await upInstace.services.update('/items',
+    '5a1f3da42c0f5e2a41ed0439',
+    {
+      $inc: { totalComments: 1 },
+    },
+    {
+      set: false,
+    },
+  );
+```
+
+## updateByFilter
+Update documents by query.
+
+`updateByFilter(module, query, data [,opts = { updated: true, set: true }])`
+
+- `module`: string, the module name. Ex: '/users'
+- `id`: string, the document id.
+- `query`: object, the mongoDB query.
+- `data`: object, the new props to assign.
+- `opts`: object, options:
+  - `updated`: boolean, if true, added or updated the prop updated. Default is true.
+  - `set`: boolean, if true, the method will add the $set operator. Default is true.
+
+
+Example:
+```javascript
+  const updated = await upInstace.services.updateByFilter('/items',
+    '5a1f3da42c0f5e2a41ed0439',
+    {
+      'user.age': { $lg: 5 },
+    },
+    {
+      $inc: { totalComments: 1 },
+    },
+    {
+      set: false,
+    },
+  );
+```
+
+## count
+Return the total document matched with query.
+
+`count(module, query)`
+
+- `module`: string, the module name. Ex: '/users'
+- `query`: object, the mongoDB query.
+
+```javascript
+  const totalComments = await upInstance.services.count('/comments', {
+    'user._id': '5a1f3dabe8c5272a5f792137',
+  });
+  const updated = await upInstance.services.updateByFilter('/users', {
+    totalComments,
+  });
+```
+
+## getLast
+Return the last document match with query.
+
+`getLast(module, query, fields);`
+
+- `module`: string, the module name. Ex: '/users'
+- `query`: object, the mongoDB query.
+- `fields`: object, the props should be populate. If empty, return all document prop.
+
+```javascript
+  const lastComment = await upInstance.services.getLast('/comments', {
+  'user._id': '5a1f3da42c0f5e2a41ed042c',
+}, {
+  _id: 1,
+  text: 1,
+});
+```
+
+## find
+Search documents without pagination system.
+
+`find(module, query[, fields]);`
+
+- `module`: string, the module name. Ex: '/users'
+- `query`: object, the mongoDB query.
+- `fields`: object, the props should be populate. If empty, return all document prop.
+
+```javascript
+  const messages = await upInstance.services.find('/messages', {
+  'user._id': '5a1f3da42c0f5e2a41ed042c',
+  }, {
+    _id: 1,
+    body: 1,
+    urlCanonical: 1,
+  });
+  const tasks = await Promise.all(
+    messages.map(m => upInstance.services.updateByFilter('/likes', {
+        messageId: m._id.toString(),
+      },
+      {
+        'message.urlCanonical': m.urlCanonical,
+      }
+    )),
+  );
+```
+
+
+---
 
 # Hooks
 
@@ -275,6 +497,7 @@ upInstance.addHook('*', 'afterRemove', async (req, removedDocument, UPInstance) 
 
 ```
 
+---
 # Register controllers
 ```javascript
 upInstance.registerController('module.methodControllerName', (req, res, next) => {
@@ -284,6 +507,27 @@ upInstance.registerController('module.methodControllerName', (req, res, next) =>
 ```
 
 
+---
+# internal swagger properties.
+
+## parameters
+### input email property
+Example:
+```yaml
+definitions:
+  logs:
+    type: object
+    properties:
+      type:
+        type: number
+        default: 5
+        required: false
+      email:
+        type: string
+        format: email
+        required: true
+```
+---
 # Example
 
 For a real example, see (https://github.com/lortmorris/up-example)
