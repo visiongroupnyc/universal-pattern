@@ -38,6 +38,12 @@ parameters:
     required: true
     default: 30
     type: number
+  distinct:
+    name: distinct
+    in: query
+    type: string
+    required: false
+    description: "set the prop for filtering distinct. ex: users.name"
   by_id:
     name: '_id'
     in: query
