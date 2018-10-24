@@ -171,7 +171,7 @@ const services = (Application) => {
       });
     },
     modify: async (collection, _id, query) => {
-      debug(`.modify called: ${JSON.stringify(query)}`);
+      debug('.modify called:', query);
       return new Promise((resolve, reject) => {
         db[collection].update({ _id: db.ObjectId(_id) }, query, (err, doc) => (err ? reject(err) : resolve(doc)));
       });
