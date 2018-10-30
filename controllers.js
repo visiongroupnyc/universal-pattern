@@ -59,7 +59,7 @@ const controllers = (Application) => {
         }
 
         const result = await services.update(req.swagger.apiPath, _id, data);
-        let updateDocument = await services.findOne(req.swagger.apiPath, _id);
+        let updateDocument = await services.findOne(req.swagger.apiPath, { _id: db.ObjectId(_id) });
 
         if (Application.hooks['*'] && Application.hooks['*'].afterUpdate) {
           updateDocument = await Application.hooks['*'].afterUpdate(req, { ...updateDocument, result }, Application);
