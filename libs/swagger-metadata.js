@@ -143,10 +143,14 @@ const swaggerMetadata = (Application) => {
       try {
         const data = getParameters(swagger, url, method, req);
         validateParameters(req, data, req.swagger.params);
-        const keys = Object.keys(req.swagger.params);
+
+        const keys = Object.keys(req.body);
         if (keys.length > 0) {
-          const k = keys.pop();
-          req.swagger.params[k].value = { ...req.body, ...req.swagger.params[k].value };
+          keys.forEach((k) => {
+            if (!req.swagger.params.modeldata.value[k]) {
+              req.swagger.params.modeldata.value[k] = req.body[k];
+            }
+          });
         }
 
         debug('params formatted: ', req.swagger.params);
