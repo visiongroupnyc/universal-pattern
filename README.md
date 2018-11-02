@@ -529,5 +529,8 @@ definitions:
 ```
 ---
 # Example
-
 For a real example, see (https://github.com/lortmorris/up-example)
+
+## License
+
+[MIT](LICENSE)
