@@ -1,11 +1,32 @@
 const debug = require('debug')('universal-pattern:controllers');
 
+
+const injectDefaultModel = (model, req) => ({
+  ...model,
+  _v: parseInt(req.swagger.params['x-swagger-model-version'], 10),
+  _n: 0,
+});
+
 const controllers = (Application) => {
   const { services, db } = Application;
+
+  const lookupProcess = async (params, lookup) => {
+    const data = await services.findOne(`/${lookup.collection}`, { _id: db.ObjectId(params[lookup.field]) }, lookup.populate.reduce((a, b) => ({ ...a, [b]: 1 }), {}));
+    if (!data) return Promise.reject(new Error(`Invalid value for ${lookup.key}`));
+    params[lookup.collection] = data;
+    return Promise.resolve(data);
+  };
+
   return {
     'universal.insert': async (req, res, next) => {
-      debug('.insert called: ', req.swagger.params.modeldata.value);
+      debug('.insert called: ', req.swagger);
       let params = req.swagger.params.modeldata.value;
+
+      if (req.swagger.params.modeldata && req.swagger.params.modeldata['x-swagger-lookup'] && req.swagger.params.modeldata['x-swagger-lookup'].length > 0) {
+        const lookups = await Promise.all(req.swagger.params.modeldata['x-swagger-lookup'].map(l => lookupProcess(params, l)));
+        console.info(lookups);
+      }
+
       params.added = new Date();
       if (params.startAt) {
         params.startAt = new Date(params.startAt);
@@ -22,7 +43,10 @@ const controllers = (Application) => {
         if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].beforeInsert) {
           params = await Application.hooks[req.swagger.apiPath].beforeInsert(req, params, Application);
         }
-        let doc = await services.insert(req.swagger.apiPath, params);
+
+
+        // check if have  x-swagger-lookup
+        let doc = await services.insert(req.swagger.apiPath, injectDefaultModel(params, req));
         if (Application.hooks['*'] && Application.hooks['*'].afterInsert) {
           params = await Application.hooks['*'].afterInsert(req, params, Application);
         }
@@ -38,7 +62,7 @@ const controllers = (Application) => {
     'universal.insertOrCount': async (req, res, next) => {
       const params = req.swagger.params.modeldata.value;
       try {
-        const doc = await services.insertOrCount(req.swagger.apiPath, params);
+        const doc = await services.insertOrCount(req.swagger.apiPath, injectDefaultModel(params, req));
         return res.json(doc);
       } catch (err) {
         return next(err);
@@ -59,6 +83,10 @@ const controllers = (Application) => {
         }
 
         const result = await services.update(req.swagger.apiPath, _id, data);
+        await services.update(req.swagger.apiPath, _id, {
+          $inc: { _n: 1 },
+        }, { updated: false, set: false });
+
         let updateDocument = await services.findOne(req.swagger.apiPath, { _id: db.ObjectId(_id) });
 
         if (Application.hooks['*'] && Application.hooks['*'].afterUpdate) {

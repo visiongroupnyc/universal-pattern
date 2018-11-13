@@ -69,6 +69,28 @@ const validNumber = (req, method, prop, meta) => {
   return n || meta.default || p;
 };
 
+const validArray = (req, method, prop, meta) => {
+  debug('validArray: ', prop, meta);
+  let n;
+  const p = req[method][prop];
+  if (meta.required && !p) throw new Error(`require array: ${prop}`);
+  if (p) {
+    if (!Array.isArray(p)) throw new Error('Invalid array');
+    if (meta.minLength && p.length < meta.minLength) throw new Error('Invalid minLength array');
+    if (meta.items && meta.items.type) {
+      p.forEach((k) => {
+        let ok = false;
+        if (meta.items.type === 'object') ok = Object.prototype.toString.call(k) === '[object Object]';
+        if (meta.items.type === 'integer' || meta.items.type === 'number') ok = Object.prototype.toString.call(k) === '[object Number]';
+        if (meta.items.type === 'array') ok = Array.isArray(k);
+        if (meta.items.type === 'string') ok = Object.prototype.toString.call(k) === '[object String]';
+        if (!ok) throw new Error(`Invalid format item type: ${k} , required ${meta.items.type}`);
+      });
+    } else n = p;
+  }
+  return n || meta.default || p;
+};
+
 const validObject = (req, method, prop, meta) => {
   debug('validObject called: ', prop, meta);
   if (method === 'post') {
@@ -77,6 +99,7 @@ const validObject = (req, method, prop, meta) => {
   }
   return req.body;
 };
+
 
 const validateParameters = (req, params, level = {}) => {
   debug('validateParameters called: ', params, level);
@@ -91,13 +114,15 @@ const validateParameters = (req, params, level = {}) => {
           level[k] = { value: {} };
           return validateParameters(req, v.schema.properties, level[k].value);
         }
-        if (v.type === 'number') {
+        if (v.type === 'number' || v.type === 'integer') {
           const value = validNumber(req, method, k, v);
           if (method === 'body') {
             if (value) Object.assign(level, { [k]: value });
           } else Object.assign(level, { [k]: { value } });
           return level;
         }
+
+
         if (v.type === 'string') {
           const value = validString(req, method, k, v);
           if (method === 'body') {
@@ -105,6 +130,15 @@ const validateParameters = (req, params, level = {}) => {
           } else Object.assign(level, { [k]: { value } });
           return level;
         }
+
+        if (v.type === 'array') {
+          const value = validArray(req, method, k, v);
+          if (method === 'body') {
+            if (value) Object.assign(level, { [k]: value });
+          } else Object.assign(level, { [k]: { value } });
+          return level;
+        }
+
         if (v.type === 'object') {
           const value = validObject(req, method, k, v);
           if (value) {
@@ -143,7 +177,6 @@ const swaggerMetadata = (Application) => {
       try {
         const data = getParameters(swagger, url, method, req);
         validateParameters(req, data, req.swagger.params);
-
         const keys = Object.keys(req.body);
         if (keys.length > 0) {
           keys.forEach((k) => {
@@ -153,6 +186,20 @@ const swaggerMetadata = (Application) => {
           });
         }
 
+        req.swagger.params.modeldata['x-swagger-lookup'] = [];
+        if (data.modeldata && data.modeldata.schema) {
+          if (data.modeldata.schema['x-swagger-model-version']) req.swagger.params['x-swagger-model-version'] = data.modeldata.schema['x-swagger-model-version'];
+          else req.swagger.params['x-swagger-model-version'] = 1;
+
+          if (data.modeldata.schema.properties) {
+            Object.keys(data.modeldata.schema.properties).forEach((key) => {
+              const item = data.modeldata.schema.properties[key];
+              if (item['x-swagger-lookup']) {
+                req.swagger.params.modeldata['x-swagger-lookup'].push({ ...item['x-swagger-lookup'], field: key });
+              }
+            });
+          }
+        }
         debug('params formatted: ', req.swagger.params);
         return next();
       } catch (error) {

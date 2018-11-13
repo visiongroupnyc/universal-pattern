@@ -78,16 +78,16 @@ up(app, {
   .catch(err => console.error('Error initializing ', err));
 ```
 
-## Creating carts.yaml
-Now, create the folder 'swagger' and put into it the first yaml file (e.g carts.yaml)
+## Creating models.yaml
+Now, create the folder 'swagger' and put into it the first yaml file (e.g models.yaml)
 
 ```yaml
 paths:
-  /carts:
+  /models:
     get:
       tags:
-        - carts
-      summary: reports list
+        - models
+      summary: models list
       x-swagger-router-controller: universal.search
       parameters:
         - $ref: '#/parameters/q'
@@ -95,19 +95,15 @@ paths:
         - $ref: '#/parameters/sorting'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/fields'
-        - name: coordinates
-          in: query
-          type: string
-          default: "0,0,0"
-          description: search by coordinates struct. long,lat,radius
+
       responses:
         '200':
           description: reports
           schema:
-            $ref: '#/definitions/cart'
+            $ref: '#/definitions/models'
     put:
       tags:
-        - carts
+        - models
       summary: insert new cart
       x-swagger-router-controller: universal.insert
       parameters:
@@ -115,16 +111,16 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/cart'
+            $ref: '#/definitions/modelInput'
       responses:
         '200':
           description: cart added
           schema:
-            $ref: '#/definitions/cart'
+            $ref: '#/definitions/models'
 
     delete:
       tags:
-        - carts
+        - models
       summary: delete cart
       x-swagger-router-controller: universal.remove
       parameters:
@@ -136,11 +132,11 @@ paths:
         '200':
           description: deleted cart
           schema:
-            $ref: '#/definitions/cart'
+            $ref: '#/definitions/models'
 
     patch:
       tags:
-        - carts
+        - models
       summary: for updated cart document
       x-swagger-router-controller: universal.update
       parameters:
@@ -148,29 +144,44 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/cart'
+            $ref: '#/definitions/modelUpdate'
       responses:
         '200':
           description: updated cart
           schema:
-            $ref: '#/definitions/cart'
+            $ref: '#/definitions/models'
 
 definitions:
-  cart:
+  modelInput:
+    x-swagger-model-version: 3
     type: object
     properties:
       name:
         type: string
-      color:
-        type: string
-        enum:
-          - black
-          - white
-          - blue
-          - green
         required: true
-      comment:
+      level:
+        type: integer
+        required: true
+      props:
+        type: array
+        items:
+          type: string
+        minLength: 4
+
+
+  modelUpdate:
+    type: object
+    properties:
+      _id:
         type: string
+        format: mongoId
+
+  models:
+    type: object
+    properties:
+      name:
+        type: string
+
 
 ```
 
@@ -180,7 +191,7 @@ Finally, run the first UP App.
 ```bash
 $ node app.js
 ```
-Open your browser and go to (http://localhost:5000/auditor/docs)
+Open your browser and go to (http://localhost:5000/services/docs)
 
 
 # Options object
@@ -510,8 +521,45 @@ upInstance.registerController('module.methodControllerName', (req, res, next) =>
 ---
 # internal swagger properties.
 
+Important: the model definition should be named 'modeldata' ever!
+
+ex:
+
+```yaml
+put:
+  tags:
+    - models
+  summary: insert new cart
+  x-swagger-router-controller: universal.insert
+  parameters:
+    - name: modeldata
+      in: body
+      required: true
+      schema:
+        $ref: '#/definitions/modelInput'
+```    
+The definition should have any name.
+
+
+## Props by UP
+
+After insert a new document, UP will add own props for a better document manager.
+
+```javascript
+{
+  _v: 0, // the document version model. This props should be modify by x-swagger-model-version
+  _n: 0, // the updated count
+}
+```
+
+## versioning
+x-swagger-model-version prop should be use for set the data model version.
+If the prop isn't present, UP automatic will add the prop \_v: 1 .
+If preset, the prop \_v value will be x-swagger-model-version value (parser to integer)
+
 ## parameters
-### input email property
+
+### input email format
 Example:
 ```yaml
 definitions:
@@ -527,10 +575,132 @@ definitions:
         format: email
         required: true
 ```
+
+### input mongoId format
+with 'mongoId' you can indicate the format with the follow validations:
+- maxLength: 24
+- minLength: 24
+- is a valid Hex value
+
+Example:
+```yaml
+definitions:
+  logs:
+    type: object
+    properties:
+      categoryId:
+        type: string
+        format: mongoId
+```
+
+
+## working with Array
+We can add arrays like props into modeldata.
+You can set items type and minLength (this mean you can set the minimum array elements)
+```yaml
+modelInput:
+  x-swagger-model-version: 3
+  type: object
+  properties:
+    name:
+      type: string
+      required: true
+    level:
+      type: integer
+      required: true
+    props:
+      type: array
+      items:
+        type: string
+      minLength: 4
+```
+## lookup
+the prop x-swagger-lookup within a prop definition indicate to UP is necessary have the follow behavior:
+- Check if the parent prop if have the 'format: mongoId'
+- Run query into defined collection to get the document (over \_id collection prop)
+- Populate the props and saved into a new object
+- append the new object to the original input model data.
+
+x-swagger-lookup should be use only for PUT and UPDATE methods, never for GET or DELETE.
+
 ---
+
+# the param 'q'
+
+The param q is use for all search endpoints (getters).
+Only with this property we can do any search action.
+
+## by ObjectId
+Just use "\_" before prop name.
+Remember, for embed props don't save the data like ObjectId, just like string.
+Ex: search by \_id
+ ```bash
+ q=_id:3A5a1f3da747404c2a510dfa24
+ ```
+
+## by regular expression
+
+Search all document where the prop name like 'tiago'
+```bash
+q=name:/tiago/
+```
+
+Search all documents where prop age is equal to nunber 31
+## by numbers (integers)
+```bash
+q=age:.31.
+```
+
+
+## By boolean props
+
+Get all documents where prop enable is false
+```bash
+q=enable:|false|
+```
+
+## Is NOT this values
+Get all documents where name is NOT pepe
+```bash
+q=name:!pepe!
+```
+
+## By NULL OR NOTNULL
+If we need filter by NULL or NOTNULL just use this words to upper case.
+Ex: get all document where valid is NOTNULL
+```bash
+q=valid:NOTNULL
+```
+
+## By range
+for filter by number range, use the special chars [] and | for separate from/to
+Ex: get all document where score is between 100 and 200
+```bash
+q=score:[100|200]
+```
+
+## By gt or lt number
+You can search using "<" or ">", setting the number value between the chars.
+Ex: get all document where age is > 40
+```bash
+q=age:>40>
+```
+---
+
 # Example
 For a real example, see (https://github.com/lortmorris/up-example)
 
-## License
+# Changelog
+- Fix props.value when the type is integer.
+- Added support for array prop type.
+- Added support for  minLength into array type.
+- Added support for items.type into array type.
+- Added new properties into default saved document:
+  - \_n: count the document updates.
+  - \_v: the document version (x-swagger-model-version).
+- Added lookup support!.
+
+
+# License
 
 [MIT](LICENSE)
