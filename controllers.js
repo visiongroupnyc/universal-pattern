@@ -24,7 +24,6 @@ const controllers = (Application) => {
 
       if (req.swagger.params.modeldata && req.swagger.params.modeldata['x-swagger-lookup'] && req.swagger.params.modeldata['x-swagger-lookup'].length > 0) {
         const lookups = await Promise.all(req.swagger.params.modeldata['x-swagger-lookup'].map(l => lookupProcess(params, l)));
-        console.info(lookups);
       }
 
       params.added = new Date();
@@ -267,7 +266,6 @@ const controllers = (Application) => {
         let result = {};
         if (distinct && distinct.length > 0) {
           const ids = await services.distinct(req.swagger.apiPath, distinct, searchParams.q);
-          console.info('ids: ', ids);
           const docs = await Promise.all(
             ids.map(id => services.findOne(req.swagger.apiPath, { [distinct]: id }, {})),
           );
