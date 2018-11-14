@@ -196,7 +196,13 @@ const controllers = (Application) => {
               q.$and.push(item2);
             } else if (k[1].toUpperCase() === 'NULL') q[k[0]] = null;
             else if (k[1].toUpperCase() === 'NOTNULL') q[k[0]] = { $ne: null };
-            else {
+            else if (k[1][0] === '{' && k[1][k[1].length - 1] === '}') {
+              const subparts = k[1].trim().substr(1).slice(0, -1).split('|');
+              console.info('subparts: ', subparts);
+              if (subparts.length === 0) return;
+              q[k[0]] = { $in: subparts };
+              console.info('Q: : : ', q);
+            } else {
               if (k[0] === 'startAt' || k[0] === 'endAt' || k[0] === 'added' || k[0] === 'updated') {
                 const today = new Date(k[1].trim());
                 const nextDay = new Date(k[1].trim());
@@ -213,7 +219,7 @@ const controllers = (Application) => {
                 q[k[0]] = k[1].trim();
               }
             }
-          }
+          }// end if (k.length === 2) {
         });
       }
       if (coordinates && coordinates !== '' && coordinates !== '0,0,0') {

@@ -6,7 +6,7 @@ const services = (Application) => {
   return {
     search: async (endpoint, query, pages = {}, fields = {}) => {
       const collection = getModule(endpoint);
-      debug(`.search called ${collection}`);
+      debug('.search called', collection, query, pages, fields);
       return new Promise((resolve, reject) => {
         const p = {
           limit: pages.limit || 50,

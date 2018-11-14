@@ -654,7 +654,8 @@ q=age:.31.
 
 ## By boolean props
 
-Get all documents where prop enable is false
+Get all documents where prop enable is false.
+Options: true or false
 ```bash
 q=enable:|false|
 ```
@@ -684,6 +685,12 @@ You can search using "<" or ">", setting the number value between the chars.
 Ex: get all document where age is > 40
 ```bash
 q=age:>40>
+```
+
+## Using $in
+For search into a prop with differents options, you can use {} operators.
+```bash
+q=name:{Toyota|Fiat}
 ```
 ---
 
