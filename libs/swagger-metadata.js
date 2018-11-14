@@ -186,8 +186,9 @@ const swaggerMetadata = (Application) => {
           });
         }
 
-        req.swagger.params.modeldata['x-swagger-lookup'] = [];
+
         if (data.modeldata && data.modeldata.schema) {
+          req.swagger.params.modeldata['x-swagger-lookup'] = [];
           if (data.modeldata.schema['x-swagger-model-version']) req.swagger.params['x-swagger-model-version'] = data.modeldata.schema['x-swagger-model-version'];
           else req.swagger.params['x-swagger-model-version'] = 1;
 
