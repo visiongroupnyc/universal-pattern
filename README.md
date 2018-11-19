@@ -698,6 +698,8 @@ q=name:{Toyota|Fiat}
 For a real example, see (https://github.com/lortmorris/up-example)
 
 # Changelog
+## nov 18, 2018
+- Hotfix:
 - Fix props.value when the type is integer.
 - Added support for array prop type.
 - Added support for  minLength into array type.

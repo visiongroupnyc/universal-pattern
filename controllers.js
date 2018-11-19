@@ -22,20 +22,20 @@ const controllers = (Application) => {
       debug('.insert called: ', req.swagger);
       let params = req.swagger.params.modeldata.value;
 
-      if (req.swagger.params.modeldata && req.swagger.params.modeldata['x-swagger-lookup'] && req.swagger.params.modeldata['x-swagger-lookup'].length > 0) {
-        const lookups = await Promise.all(req.swagger.params.modeldata['x-swagger-lookup'].map(l => lookupProcess(params, l)));
-      }
-
-      params.added = new Date();
-      if (params.startAt) {
-        params.startAt = new Date(params.startAt);
-      }
-
-      if (params.endAt) {
-        params.endAt = new Date(params.endAt);
-      }
-
       try {
+        if (req.swagger.params.modeldata && req.swagger.params.modeldata['x-swagger-lookup'] && req.swagger.params.modeldata['x-swagger-lookup'].length > 0) {
+          await Promise.all(req.swagger.params.modeldata['x-swagger-lookup'].map(l => lookupProcess(params, l)));
+        }
+
+        params.added = new Date();
+        if (params.startAt) {
+          params.startAt = new Date(params.startAt);
+        }
+
+        if (params.endAt) {
+          params.endAt = new Date(params.endAt);
+        }
+
         if (Application.hooks['*'] && Application.hooks['*'].beforeInsert) {
           params = await Application.hooks['*'].beforeInsert(req, params, Application);
         }
