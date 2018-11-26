@@ -576,6 +576,39 @@ definitions:
         required: true
 ```
 
+
+### x-swagger-regex
+Test the input value using the regex.
+
+```yaml
+definitions:
+  cartInput:
+    type: object
+    properties:
+      name:
+        type: string
+        x-swagger-regex: "[az]*"
+      cost:
+        type: integer
+        format: float
+      color:
+        type: string
+        enum:
+          - black
+          - white
+          - blue
+          - green
+        required: true
+      modelId:
+        type: string
+        format: mongoId
+        x-swagger-lookup:
+          collection: models
+          populate:
+            - _id
+            - name
+
+```
 ### input mongoId format
 with 'mongoId' you can indicate the format with the follow validations:
 - maxLength: 24

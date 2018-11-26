@@ -14,6 +14,9 @@ const controllers = (Application) => {
     const data = await services.findOne(`/${lookup.collection}`, { _id: db.ObjectId(params[lookup.field]) }, lookup.populate.reduce((a, b) => ({ ...a, [b]: 1 }), {}));
     if (!data) return Promise.reject(new Error(`Invalid value for ${lookup.key}`));
     params[lookup.collection] = data;
+    if (data._id) {
+      params[lookup.collection]._id = data._id.toString();
+    }
     return Promise.resolve(data);
   };
 
