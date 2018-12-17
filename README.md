@@ -731,6 +731,9 @@ q=name:{Toyota|Fiat}
 For a real example, see (https://github.com/lortmorris/up-example)
 
 # Changelog
+## Dec 18, 2017
+- Added \_id into update object for hooks
+
 ## nov 18, 2018
 - Hotfix:
 - Fix props.value when the type is integer.

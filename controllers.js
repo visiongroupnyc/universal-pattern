@@ -72,9 +72,9 @@ const controllers = (Application) => {
     },
     'universal.update': async (req, res, next) => {
       let data = req.swagger.params.modeldata.value;
-      const { _id } = data;
-      delete data._id;
-      debug('.update called: ', _id, data);
+      const { _id } = { ...data };
+
+      debug('.update called: ', data);
       try {
         if (Application.hooks['*'] && Application.hooks['*'].beforeUpdate) {
           data = await Application.hooks['*'].beforeUpdate(req, data, Application);
@@ -84,6 +84,7 @@ const controllers = (Application) => {
           data = await Application.hooks[req.swagger.apiPath].beforeUpdate(req, data, Application);
         }
 
+        delete data._id;
         const result = await services.update(req.swagger.apiPath, _id, data);
         await services.update(req.swagger.apiPath, _id, {
           $inc: { _n: 1 },
