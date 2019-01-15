@@ -365,6 +365,38 @@ Example:
   );
 ```
 
+## aggregate
+Run query using aggregate framework.
+
+`aggregate(collection, query, [options = {}])`
+
+Example: get all duplicates emails entries.
+```javascript
+const query = [
+  {
+    $group: {
+      _id: {
+        email: '$email',
+      },
+      uniqueIds: {
+        $addToSet: '$_id',
+      },
+      count: {
+        $sum: 1,
+      },
+    },
+  },
+  {
+    $match: {
+      count: {
+        $gt: 1,
+      },
+    },
+  },
+];
+
+const items = await Application.services.aggregate(`/${collection}`, query);
+```
 ## count
 Return the total document matched with query.
 

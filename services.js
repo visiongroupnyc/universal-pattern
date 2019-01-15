@@ -187,6 +187,16 @@ const services = (Application) => {
         db[collection].update({ _id: db.ObjectId(_id) }, query, (err, doc) => (err ? reject(err) : resolve(doc)));
       });
     },
+    aggregate: async (endpoint, pipelines, options = undefined) => {
+      const collection = getModule(endpoint);
+      debug('aggregate called: ', collection, pipelines);
+      return new Promise((resolve, reject) => {
+        db[collection].aggregate(pipelines, options, (err, docs) => {
+          if (err) return reject(err);
+          return resolve(docs);
+        });
+      });
+    },
   };
 };
 
