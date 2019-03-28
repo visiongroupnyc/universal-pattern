@@ -4,6 +4,11 @@ Universal Pattern is single and easy way to build professionals API using MongoD
 This is a [Node.js](https://nodejs.org/en/) module available through the
 [npm registry](https://www.npmjs.com/).
 
+## Powered by [Cesar Casas](https://www.linkedin.com/in/cesarcasas)
+## Examples
+
+### Simple social network API with Universal Pattern
+* (Universal Pattern Example)[https://github.com/lortmorris/up-example]
 
 # Instalation
 ```bash
@@ -762,7 +767,7 @@ q=name:{Toyota|Fiat}
 # Example
 For a real example, see (https://github.com/lortmorris/up-example)
 
-# Changelog
+# Change log
 ## Dec 18, 2017
 - Added \_id into update object for hooks
 
