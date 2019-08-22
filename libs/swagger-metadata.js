@@ -148,10 +148,16 @@ const validateParameters = (req, params, level = {}) => {
           }
         }
 
+        if (v.type === 'file') {
+          console.info('type file: ', req.body);
+          // Object.assign(level, { [k]: { value } });
+          return level;
+        }
+
         Object.assign(level, { [k]: { value: req[method][k] } });
         return level;
       } catch (err) {
-        debug('invalid model data validation: ', err);
+        console.error('invalid model data validation: ', err);
         throw Error(`invalid model data validation: ${err.toString()}`);
       }
     });
