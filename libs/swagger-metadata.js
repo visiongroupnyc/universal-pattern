@@ -69,6 +69,19 @@ const validNumber = (req, method, prop, meta) => {
   return n || meta.default || p;
 };
 
+
+const validBoolean = (req, method, prop, meta) => {
+  debug('validBoolean: ', prop, meta);
+  const p = req[method][prop];
+  if (meta.required && !p) throw new Error(`require boolean: ${prop}`);
+
+  if (p) {
+    return Boolean(p);
+  }
+  return Boolean(meta.default);
+};
+
+
 const validArray = (req, method, prop, meta) => {
   debug('validArray: ', prop, meta);
   let n;
@@ -84,6 +97,7 @@ const validArray = (req, method, prop, meta) => {
         if (meta.items.type === 'integer' || meta.items.type === 'number') ok = Object.prototype.toString.call(k) === '[object Number]';
         if (meta.items.type === 'array') ok = Array.isArray(k);
         if (meta.items.type === 'string') ok = Object.prototype.toString.call(k) === '[object String]';
+        if (meta.items.type === 'boolean') ok = Object.prototype.toString.call(k) === '[object Boolean]';
         if (!ok) throw new Error(`Invalid format item type: ${k} , required ${meta.items.type}`);
       });
     } else n = p;
@@ -92,12 +106,37 @@ const validArray = (req, method, prop, meta) => {
 };
 
 const validObject = (req, method, prop, meta) => {
-  debug('validObject called: ', prop, meta);
-  if (method === 'post') {
-    // const { body } = req;
-    // const { schema } = meta;
+  if (method === 'body') {
+    const toValidate = req.body[prop];
+    if (!('properties' in meta)) throw new Error('Invalid Swagger object schema definition');
+    const keys = Object.keys(meta.properties);
+    for (let x = 0; x < keys.length; x += 1) {
+      const key = keys[x];
+      const m = meta.properties[key];
+      if (m.required) {
+        if (typeof toValidate[key] === 'undefined') throw new Error(`The prop ${key} is required`);
+      }
+
+      if (m.default) {
+        if (typeof toValidate[key] === 'undefined') req.body[prop][key] = m.default;
+      }
+
+      if (m.type === 'string') {
+        if (Object.prototype.toString.call(toValidate[key]) !== '[object String]') throw new Error('Invalid type, String is required');
+      }
+
+      if (m.type === 'array') {
+        if (Object.prototype.toString.call(toValidate[key]) !== '[object Array]') throw new Error('Invalid type, Array is required');
+      }
+
+      if (m.type === 'integer') {
+        if (Object.prototype.toString.call(toValidate[key]) !== '[object Number]') throw new Error('Invalid type, Integer is required');
+      }
+    }
+
+    return req.body[prop];
   }
-  return req.body;
+  return {};
 };
 
 
@@ -131,6 +170,14 @@ const validateParameters = (req, params, level = {}) => {
           return level;
         }
 
+        if (v.type === 'Boolean') {
+          const value = validBoolean(req, method, k, v);
+          if (method === 'body') {
+            if (value) Object.assign(level, { [k]: value });
+          } else Object.assign(level, { [k]: { value } });
+          return level;
+        }
+
         if (v.type === 'array') {
           const value = validArray(req, method, k, v);
           if (method === 'body') {
@@ -140,7 +187,9 @@ const validateParameters = (req, params, level = {}) => {
         }
 
         if (v.type === 'object') {
+          console.info('is a object: ', k, v);
           const value = validObject(req, method, k, v);
+          console.info('value: ', value);
           if (value) {
             if (method === 'body') Object.assign(level, { [k]: value });
             else Object.assign(level, { [k]: { value } });
