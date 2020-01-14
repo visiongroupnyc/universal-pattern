@@ -3,6 +3,9 @@ const debug = require('debug')('universal-pattern:libs:swagger-router');
 const swaggerRouter = (Application) => {
   const { app, controllers, swagger } = Application;
   const { paths } = swagger;
+  const swaggerRouterManager = props => (req, res, next) => {
+    return Application.localOptions.routeController(req, res, next, props);
+  };
   Object.entries(paths)
     .forEach(([path, value]) => {
       Object.entries(value)
@@ -15,7 +18,7 @@ const swaggerRouter = (Application) => {
           const finalpath = `${basePath}${path}`;
 
           debug('registering: ', method, finalpath, props['x-swagger-router-controller']);
-          app[method](finalpath, (req, res, next) => {
+          app[method](finalpath, swaggerRouterManager(props), (req, res, next) => {
             try {
               debug('request: ', req.method, req.url, req.query);
               handler()(req, res, (err) => {

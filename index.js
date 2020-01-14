@@ -60,6 +60,7 @@ const universalPattern = (app = express(), options = {}) => {
     database: {
       uri: 'mongodb://localhost:27017/up',
     },
+    routeController: (req, res, next) => { next(); },
   }, options);
 
   const db = mongojs(localOptions.database.uri);

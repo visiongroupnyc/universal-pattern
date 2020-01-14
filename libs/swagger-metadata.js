@@ -153,63 +153,52 @@ const validateParameters = (req, params, level = {}) => {
           level[k] = { value: {} };
           return validateParameters(req, v.schema.properties, level[k].value);
         }
+
         if (v.type === 'number' || v.type === 'integer') {
           const value = validNumber(req, method, k, v);
-          if (method === 'body') {
-            if (value) Object.assign(level, { [k]: value });
-          } else Object.assign(level, { [k]: { value } });
+          level = { ...level, [k]: value };
           return level;
         }
-
 
         if (v.type === 'string') {
           const value = validString(req, method, k, v);
-          if (method === 'body') {
-            if (value) Object.assign(level, { [k]: value });
-          } else Object.assign(level, { [k]: { value } });
+          level = { ...level, [k]: value };
           return level;
         }
 
-        if (v.type === 'Boolean') {
+        if (v.type === 'boolean') {
           const value = validBoolean(req, method, k, v);
-          if (method === 'body') {
-            if (value) Object.assign(level, { [k]: value });
-          } else Object.assign(level, { [k]: { value } });
+          level = { ...level, [k]: value };
           return level;
         }
 
         if (v.type === 'array') {
           const value = validArray(req, method, k, v);
-          if (method === 'body') {
-            if (value) Object.assign(level, { [k]: value });
-          } else Object.assign(level, { [k]: { value } });
+          level = { ...level, [k]: value };
           return level;
         }
 
         if (v.type === 'object') {
-          console.info('is a object: ', k, v);
           const value = validObject(req, method, k, v);
-          console.info('value: ', value);
           if (value) {
-            if (method === 'body') Object.assign(level, { [k]: value });
-            else Object.assign(level, { [k]: { value } });
+            level = { ...level, [k]: value };
             return level;
           }
         }
 
         if (v.type === 'file') {
-          console.info('type file: ', req.body);
           // Object.assign(level, { [k]: { value } });
           return level;
         }
 
-        Object.assign(level, { [k]: { value: req[method][k] } });
+        level = { ...level, [k]: req[method][k] };
         return level;
       } catch (err) {
         console.error('invalid model data validation: ', err);
         throw Error(`invalid model data validation: ${err.toString()}`);
       }
     });
+
   return level;
 };
 
@@ -231,7 +220,7 @@ const swaggerMetadata = (Application) => {
     if (swagger.paths[url] && swagger.paths[url][method]) {
       try {
         const data = getParameters(swagger, url, method, req);
-        validateParameters(req, data, req.swagger.params);
+        req.swagger.params = validateParameters(req, data, req.swagger.params);
         const keys = Object.keys(req.body);
         if (keys.length > 0) {
           keys.forEach((k) => {

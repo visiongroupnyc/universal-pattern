@@ -78,6 +78,13 @@ up(app, {
   database: {
     uri: config.get('connection.mongodb.uri'),
   },
+  routeController: (req, res, next, props) => {
+    if (props['x-swagger-protected']) {
+      const todo = passport.authenticate('jwt', { session: false });
+      return todo(req, res, next);
+    }
+    return next();
+  }
 })
   .then((upInstance) => server.listen(port, () => console.info(`listen *:${port}`)))
   .catch(err => console.error('Error initializing ', err));
@@ -782,7 +789,16 @@ For a real example, see (https://github.com/lortmorris/up-example)
   - \_v: the document version (x-swagger-model-version).
 - Added lookup support!.
 
+## Jan 9, 2020
+- Hotfix for object properties definitions.
+
+## Jan 13, 2020
+- Hotfix for boolean type
+- Replace Object.assign for {}
+- Added `routeController` prop into upInstance. params (req, res, next, props )
+- Removed `value` subprop from swagger.params.
+- coordinates field fixed.
+
 
 # License
-
 [MIT](LICENSE)

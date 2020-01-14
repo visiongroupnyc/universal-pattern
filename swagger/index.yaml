@@ -19,6 +19,7 @@ parameters:
     in: query
     required: false
     type: string
+    default: ''
     description: query params for search
   page:
     name: page
@@ -30,6 +31,7 @@ parameters:
     name: sorting
     in: query
     required: false
+    default: ''
     description: sorting by field
     type: string
   limit:
@@ -61,6 +63,7 @@ parameters:
     name: fields
     in: query
     type: string
+    default: ''
     description: populate fields
   coordinates:
     name: coordinates
@@ -68,3 +71,9 @@ parameters:
     type: string
     required: false
     description: search by coordinates. Use long,lat,radiusMeters. 34.12323,-2.25525,1000
+  Authorization:
+    name: authorization
+    in: header
+    type: string
+    description: bearer token
+    required: true

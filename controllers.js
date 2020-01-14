@@ -151,16 +151,15 @@ const controllers = (Application) => {
     },
     'universal.search': async (req, res, next) => {
       debug('.search called: ', req.swagger.params);
-      let q = req.swagger.params.q.value;
-      let sorting = req.swagger.params.sorting.value;
-      const page = req.swagger.params.page.value;
-      const limit = req.swagger.params.limit.value;
-      const fields = req.swagger.params.fields.value;
-      const distinct = req.swagger.params && req.swagger.params.distinct ? req.swagger.params.distinct.value : null;
-      let coordinates = null;
 
-
-      if (req.swagger.params.coordinates) coordinates = req.swagger.params.coordinates.value;
+      let { q, sorting } = req.swagger.params;
+      const {
+        page,
+        limit,
+        fields,
+        distinct,
+        coordinates,
+      } = req.swagger.params;
 
       if (q) {
         const parts = q.split(',');
