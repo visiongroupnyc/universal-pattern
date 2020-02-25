@@ -799,6 +799,9 @@ For a real example, see (https://github.com/lortmorris/up-example)
 - Removed `value` subprop from swagger.params.
 - coordinates field fixed.
 
+## Feb 25, 2020
+
+- Hotfix: remove by _id
 
 # License
 [MIT](LICENSE)

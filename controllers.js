@@ -105,7 +105,7 @@ const controllers = (Application) => {
       }
     },
     'universal.remove': async (req, res, next) => {
-      const _id = req.swagger.params._id.value;
+      const { _id } = req.swagger.params;
       debug('.remove called: ', _id);
       try {
         if (Application.hooks['*'] && Application.hooks['*'].beforeRemove) {
