@@ -45,9 +45,9 @@ const universalPattern = (app = express(), options = {}) => {
       info: {
         version: 1.0,
         title: 'Server API',
-        termsOfService: '',
+        termsOfService: 'http://www.website.com/terms',
         contact: {
-          email: 'hola@goxo.es',
+          email: 'cesarcasas@bsdsolutions.com.ar',
         },
         license: {
           name: 'Apache 2.0',
@@ -60,7 +60,6 @@ const universalPattern = (app = express(), options = {}) => {
     database: {
       uri: 'mongodb://localhost:27017/up',
     },
-    routeController: (req, res, next) => { next(); },
   }, options);
 
   const db = mongojs(localOptions.database.uri);
@@ -68,6 +67,7 @@ const universalPattern = (app = express(), options = {}) => {
     localOptions,
     db,
     app,
+    redis: options.redis,
     getModule,
   };
 
