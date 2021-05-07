@@ -45,9 +45,9 @@ const universalPattern = (app = express(), options = {}) => {
       info: {
         version: 1.0,
         title: 'Server API',
-        termsOfService: 'http://www.website.com/terms',
+        termsOfService: '',
         contact: {
-          email: 'cesarcasas@bsdsolutions.com.ar',
+          email: 'hola@goxo.es',
         },
         license: {
           name: 'Apache 2.0',
