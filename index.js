@@ -57,6 +57,7 @@ const universalPattern = (app = express(), options = {}) => {
     },
     compress: false,
     cors: false,
+    production: true,
     database: {
       uri: 'mongodb://localhost:27017/up',
     },
@@ -90,12 +91,15 @@ const universalPattern = (app = express(), options = {}) => {
 
     UP.swagger = lodash.merge({ ...yamlContent }, localOptions.swagger, { basePath: localOptions.swagger.baseDoc });
 
-    app.use(`${localOptions.swagger.baseDoc}/docs/`, express.static(`${__dirname}/libs/swagger-ui`));
-    app.use(`${localOptions.swagger.baseDoc}/docs/`, (req, res) => {
-      const content = fs.readFileSync(`${__dirname}/libs/swagger-ui/index.tmp`).toString();
-      res.end(content.replace('[[URL]]', `${localOptions.swagger.baseDoc}/api-docs`));
-    });
-    app.use(`${localOptions.swagger.baseDoc}/api-docs`, (req, res) => res.json(UP.swagger));
+    if (!localOptions.production) {
+      app.use(`${localOptions.swagger.baseDoc}/docs/`, express.static(`${__dirname}/libs/swagger-ui`));
+      app.use(`${localOptions.swagger.baseDoc}/docs/`, (req, res) => {
+        const content = fs.readFileSync(`${__dirname}/libs/swagger-ui/index.tmp`).toString();
+        res.end(content.replace('[[URL]]', `${localOptions.swagger.baseDoc}/api-docs`));
+      });
+      app.use(`${localOptions.swagger.baseDoc}/api-docs`, (req, res) => res.json(UP.swagger));
+    }
+
     app.use(swaggerMetadata(UP));
     paginate(UP);
     UP.services = services(UP);

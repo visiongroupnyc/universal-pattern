@@ -75,6 +75,7 @@ up(app, {
   },
   compress: true,
   cors: true,
+  production: process.env.NODE_ENV === 'production',
   database: {
     uri: config.get('connection.mongodb.uri'),
   },
@@ -89,6 +90,7 @@ up(app, {
   .then((upInstance) => server.listen(port, () => console.info(`listen *:${port}`)))
   .catch(err => console.error('Error initializing ', err));
 ```
+* production: if this props is false, we wil have available the interactive documentation (swagger ui)
 
 ## Creating models.yaml
 Now, create the folder 'swagger' and put into it the first yaml file (e.g models.yaml)
