@@ -1,6 +1,6 @@
 {
   "name": "@goxocity/universal-pattern",
-  "version": "1.0.25",
+  "version": "1.1.0",
   "description": "This is easy way to implement universal pattern, swagger and restfull api",
   "main": "index.js",
   "scripts": {
