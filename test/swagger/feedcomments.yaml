@@ -1,0 +1,99 @@
+paths:
+  /feedcomments:
+    get:
+      tags:
+        - feedcomments
+      summary: feedcomments list
+      x-swagger-router-controller: universal.search
+      parameters:
+        - $ref: '#/parameters/q'
+        - $ref: '#/parameters/page'
+        - $ref: '#/parameters/sorting'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/fields'
+
+      responses:
+        '200':
+          description: feedcomments list
+          schema:
+            $ref: '#/definitions/feedcomment'
+
+    delete:
+      tags:
+        - feedcomments
+      summary: delete feedcomment
+      x-swagger-router-controller: universal.remove
+      parameters:
+        - name: _id
+          in: query
+          required: true
+          type: string
+      responses:
+        '200':
+          description: deleted feedcomment
+          schema:
+            $ref: '#/definitions/feedcomment'
+
+    put:
+      tags:
+        - feedcomments
+      summary: insert new feedcomment
+      x-swagger-router-controller: universal.insert
+      parameters:
+        - name: modeldata
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/feedcommentInput'
+      responses:
+        '200':
+          description: feedcomment added
+          schema:
+            $ref: '#/definitions/feedcomment'
+
+definitions:
+  feedcommentInput:
+    type: object
+    properties:
+      feedId:
+        type: string
+        format: mongoId
+        x-swagger-lookup:
+          collection: feed
+          populate:
+            - _id
+      userId:
+        type: string
+        format: mongoId
+        x-swagger-lookup:
+          collection: users
+          populate:
+            - _id
+            - firstname
+            - lastname
+      comment:
+        type: string
+
+  feedcomment:
+    type: object
+    properties:
+      userId:
+        type: string
+      users:
+        type: object
+        properties:
+          _id:
+            type: string
+          firstname:
+            type: string
+          lastname:
+            type: string
+      feedId:
+        type: string
+      feed:
+        type: object
+        properties:
+          _id:
+            type: string
+      comment:
+        type: string

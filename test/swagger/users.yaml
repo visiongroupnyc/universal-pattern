@@ -1,0 +1,112 @@
+paths:
+  /users:
+    get:
+      tags:
+        - users
+      summary: users list
+      x-swagger-router-controller: universal.search
+      parameters:
+        - $ref: '#/parameters/q'
+        - $ref: '#/parameters/page'
+        - $ref: '#/parameters/sorting'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/fields'
+        - $ref: '#/parameters/tenant'
+
+      responses:
+        '200':
+          description: cars list
+          schema:
+            $ref: '#/definitions/user'
+    put:
+      tags:
+        - users
+      summary: insert new user
+      x-swagger-router-controller: universal.insert
+      parameters:
+        - $ref: '#/parameters/tenant'
+        - name: modeldata
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/userInput'
+      responses:
+        '200':
+          description: user added
+          schema:
+            $ref: '#/definitions/user'
+
+    delete:
+      tags:
+        - users
+      summary: delete user
+      x-swagger-router-controller: universal.remove
+      parameters:
+        - name: _id
+          in: query
+          required: true
+          type: string
+      responses:
+        '200':
+          description: deleted user
+          schema:
+            $ref: '#/definitions/user'
+
+    patch:
+      tags:
+        - users
+      summary: for updated car document
+      x-swagger-router-controller: universal.update
+      parameters:
+        - $ref: '#/parameters/tenant'
+        - name: modeldata
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/userUpdate'
+      responses:
+        '200':
+          description: updated user
+          schema:
+            $ref: '#/definitions/user'
+
+definitions:
+  userInput:
+    type: object
+    properties:
+      firstname:
+        type: string
+        required: true
+      lastname:
+        type: string
+        required: true
+      email:
+        type: string
+        format: email
+        required: true
+        x-swagger-unique: true
+
+  userUpdate:
+    type: object
+    properties:
+      _id:
+        type: string
+        format: mongoId
+
+  user:
+    type: object
+    properties:
+      _id:
+        type: string
+      firstname:
+        type: string
+      lastname:
+        type: string
+      email:
+        type: string
+      totalComments:
+        type: number
+      totalRatings:
+        type: number
+      totalPhotos:
+        type: number

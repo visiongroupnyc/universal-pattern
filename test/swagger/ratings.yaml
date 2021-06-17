@@ -1,0 +1,91 @@
+paths:
+  /ratings:
+    get:
+      tags:
+        - ratings
+      summary: rating list
+      x-swagger-router-controller: universal.search
+      parameters:
+        - $ref: '#/parameters/q'
+        - $ref: '#/parameters/page'
+        - $ref: '#/parameters/sorting'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/fields'
+        - $ref: '#/parameters/tenant'
+
+      responses:
+        '200':
+          description: rating list
+          schema:
+            $ref: '#/definitions/rating'
+
+    delete:
+      tags:
+        - ratings
+      summary: delete rating
+      x-swagger-router-controller: universal.remove
+      parameters:
+        - $ref: '#/parameters/tenant'
+        - name: _id
+          in: query
+          required: true
+          type: string
+      responses:
+        '200':
+          description: deleted rating
+          schema:
+            $ref: '#/definitions/rating'
+
+    put:
+      tags:
+        - ratings
+      summary: insert new rating
+      x-swagger-router-controller: universal.insertOrCount
+      parameters:
+        - $ref: '#/parameters/tenant'
+        - name: modeldata
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ratingInput'
+      responses:
+        '200':
+          description: rating added
+          schema:
+            $ref: '#/definitions/rating'
+
+definitions:
+  ratingInput:
+    type: object
+    properties:
+      _criterial:
+        type: string
+        value: userId
+      userId:
+        type: string
+        format: mongoId
+        required: true
+        x-swagger-lookup:
+          collection: users
+          populate:
+            - _id
+            - firstname
+            - lastname
+
+
+  rating:
+    type: object
+    properties:
+      userId:
+        type: string
+      count:
+        type: number
+      users:
+        type: object
+        properties:
+          _id:
+            type: string
+          firstname:
+            type: string
+          lastname:
+            type: string

@@ -1,0 +1,97 @@
+paths:
+  /brands:
+    get:
+      tags:
+        - brands
+      summary: brands list
+      x-swagger-router-controller: universal.search
+      parameters:
+        - $ref: '#/parameters/q'
+        - $ref: '#/parameters/page'
+        - $ref: '#/parameters/sorting'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/fields'
+
+      responses:
+        '200':
+          description: reports
+          schema:
+            $ref: '#/definitions/brand'
+    put:
+      tags:
+        - brands
+      summary: insert new brand
+      x-swagger-router-controller: universal.insert
+      parameters:
+        - name: modeldata
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/brandInput'
+      responses:
+        '200':
+          description: brand added
+          schema:
+            $ref: '#/definitions/brand'
+
+    delete:
+      tags:
+        - brands
+      summary: delete brand
+      x-swagger-router-controller: universal.remove
+      parameters:
+        - name: _id
+          in: query
+          required: true
+          type: string
+      responses:
+        '200':
+          description: deleted brand
+          schema:
+            $ref: '#/definitions/brand'
+
+    patch:
+      tags:
+        - brands
+      summary: for updated brand document
+      x-swagger-router-controller: universal.update
+      parameters:
+        - name: modeldata
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/brandUpdate'
+      responses:
+        '200':
+          description: updated brand
+          schema:
+            $ref: '#/definitions/models'
+
+definitions:
+  brandInput:
+    x-swagger-model-version: 1
+    type: object
+    properties:
+      name:
+        type: string
+        required: true
+
+  brandUpdate:
+    type: object
+    properties:
+      _id:
+        type: string
+        format: mongoId
+
+  brand:
+    brand: object
+    properties:
+      _id:
+        type: string
+        format: mongoId
+      name:
+        type: string
+      totalItems:
+        type: number
+      totalCars:
+        type: number

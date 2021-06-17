@@ -1,0 +1,72 @@
+paths:
+  /feed:
+    get:
+      tags:
+        - feed
+      summary: feed list
+      x-swagger-router-controller: universal.search
+      parameters:
+        - $ref: '#/parameters/q'
+        - $ref: '#/parameters/page'
+        - $ref: '#/parameters/sorting'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/fields'
+
+      responses:
+        '200':
+          description: feed list
+          schema:
+            $ref: '#/definitions/feeditem'
+
+    delete:
+      tags:
+        - feed
+      summary: delete feeditem
+      x-swagger-router-controller: universal.remove
+      parameters:
+        - name: _id
+          in: query
+          required: true
+          type: string
+      responses:
+        '200':
+          description: deleted user
+          schema:
+            $ref: '#/definitions/feeditem'
+
+definitions:
+  feeditem:
+    type: object
+    properties:
+      _id:
+        type: string
+      userId:
+        type: string
+      users:
+        type: object
+        properties:
+          _id:
+            type: string
+          firstname:
+            type: string
+          lastname:
+            type: string
+      comment:
+        type: string
+      photo:
+        type: string
+      rating:
+        type: number
+      brandId:
+        type: string
+      brands:
+        type: object
+        properties:
+          _id:
+            type: string
+          name:
+            type: string
+      totalComments:
+        type: number
+      totalLikes:
+        type: number

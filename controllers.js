@@ -1,23 +1,31 @@
 const debug = require('debug')('universal-pattern:controllers');
 
-
-const injectDefaultModel = (model, req) => ({
-  ...model,
-  _v: parseInt(req.swagger.params['x-swagger-model-version'], 10),
-  _n: 0,
-});
-
 const controllers = (Application) => {
-  const { services, db } = Application;
+  const { services, db, getModule } = Application;
+
+  const injectDefaultModel = (model, req) => ({
+    ...model,
+    _v: parseInt(req.swagger.params['x-swagger-model-version'], 10),
+    _n: 0,
+    _tenant: db.getTenantPattern(req?.headers?.tenant),
+  });
 
   const lookupProcess = async (params, lookup) => {
-    const data = await services.findOne(`/${lookup.collection}`, { _id: db.ObjectId(params[lookup.field]) }, lookup.populate.reduce((a, b) => ({ ...a, [b]: 1 }), {}));
-    if (!data) return Promise.reject(new Error(`Invalid value ${lookup.field}(${params[lookup.field]}) for ${lookup.collection}`));
+    const fields = lookup.populate.reduce((a, b) => ({ ...a, [b]: 1 }), {});
+    const data = await services.findOne(`/${lookup.collection}`, { _id: db.ObjectId(params[lookup.field]) }, fields, { tenant: lookup.tenant });
+    if (!data) throw new Error(`Invalid value ${lookup.field}(${params[lookup.field]}) for ${lookup.collection}`);
     params[lookup.collection] = data;
     if (data._id) {
       params[lookup.collection]._id = data._id.toString();
     }
     return Promise.resolve(data);
+  };
+
+  const uniqueProcess = async (params, unique) => {
+    const collection = getModule(unique.apiPath);
+    const data = await services.findOne(`/${collection}`, { [unique.field]: params[unique.field] }, { _id: 1 }, { tenant: unique.tenant });
+    if (data) return Promise.reject(new Error(`Duplicate value for ${unique.field} field, should be unique`));
+    return Promise.resolve();
   };
 
   return {
@@ -26,8 +34,22 @@ const controllers = (Application) => {
       let params = req.swagger.params.modeldata.value;
 
       try {
+        if (req.swagger.params.modeldata && req.swagger.params.modeldata['x-swagger-unique'] && req.swagger.params.modeldata['x-swagger-unique'].length > 0) {
+          await Promise.all(
+            req.swagger.params.modeldata['x-swagger-unique']
+              .map((l) => uniqueProcess(params, {
+                ...l,
+                apiPath: req.swagger.apiPath,
+                tenant: req.swagger.tenant,
+              })),
+          );
+        }
+
         if (req.swagger.params.modeldata && req.swagger.params.modeldata['x-swagger-lookup'] && req.swagger.params.modeldata['x-swagger-lookup'].length > 0) {
-          await Promise.all(req.swagger.params.modeldata['x-swagger-lookup'].map(l => lookupProcess(params, l)));
+          await Promise.all(
+            req.swagger.params.modeldata['x-swagger-lookup']
+              .map((l) => lookupProcess(params, { ...l, tenant: req.swagger.tenant })),
+          );
         }
 
         params.added = new Date();
@@ -46,9 +68,7 @@ const controllers = (Application) => {
           params = await Application.hooks[req.swagger.apiPath].beforeInsert(req, params, Application);
         }
 
-
-        // check if have  x-swagger-lookup
-        let doc = await services.insert(req.swagger.apiPath, injectDefaultModel(params, req));
+        let doc = await services.insert(req.swagger.apiPath, injectDefaultModel(params, req), { tenant: req.swagger.tenant });
         if (Application.hooks['*'] && Application.hooks['*'].afterInsert) {
           params = await Application.hooks['*'].afterInsert(req, params, Application);
         }
@@ -64,7 +84,24 @@ const controllers = (Application) => {
     'universal.insertOrCount': async (req, res, next) => {
       const params = req.swagger.params.modeldata.value;
       try {
-        const doc = await services.insertOrCount(req.swagger.apiPath, injectDefaultModel(params, req));
+        if (req.swagger.params.modeldata && req.swagger.params.modeldata['x-swagger-unique'] && req.swagger.params.modeldata['x-swagger-unique'].length > 0) {
+          await Promise.all(
+            req.swagger.params.modeldata['x-swagger-unique']
+              .map((l) => uniqueProcess(params, {
+                ...l,
+                apiPath: req.swagger.apiPath,
+                tenant: req.swagger.tenant,
+              })),
+          );
+        }
+
+        if (req.swagger.params.modeldata && req.swagger.params.modeldata['x-swagger-lookup'] && req.swagger.params.modeldata['x-swagger-lookup'].length > 0) {
+          await Promise.all(
+            req.swagger.params.modeldata['x-swagger-lookup']
+              .map((l) => lookupProcess(params, { ...l, tenant: req.swagger.tenant })),
+          );
+        }
+        const doc = await services.insertOrCount(req.swagger.apiPath, injectDefaultModel(params, req), { tenant: req.swagger.tenant });
         return res.json(doc);
       } catch (err) {
         return next(err);
@@ -85,12 +122,12 @@ const controllers = (Application) => {
         }
 
         delete data._id;
-        const result = await services.update(req.swagger.apiPath, _id, data);
+        const result = await services.update(req.swagger.apiPath, _id, data, { updated: true, set: true }, { tenant: req.swagger.tenant });
         await services.update(req.swagger.apiPath, _id, {
           $inc: { _n: 1 },
-        }, { updated: false, set: false });
+        }, { updated: false, set: false }, { tenant: req.swagger.tenant });
 
-        let updateDocument = await services.findOne(req.swagger.apiPath, { _id: db.ObjectId(_id) });
+        let updateDocument = await services.findOne(req.swagger.apiPath, { _id: db.ObjectId(_id) }, {}, { tenant: req.swagger.tenant });
 
         if (Application.hooks['*'] && Application.hooks['*'].afterUpdate) {
           updateDocument = await Application.hooks['*'].afterUpdate(req, { ...updateDocument, result }, Application);
@@ -115,8 +152,8 @@ const controllers = (Application) => {
           await Application.hooks[req.swagger.apiPath].beforeRemove(req, _id, Application);
         }
 
-        let removedDocument = await services.findOne(req.swagger.apiPath, { _id: db.ObjectId(_id) });
-        const result = await services.remove(req.swagger.apiPath, _id);
+        let removedDocument = await services.findOne(req.swagger.apiPath, { _id: db.ObjectId(_id) }, {}, { tenant: req.swagger.tenant });
+        const result = await services.remove(req.swagger.apiPath, _id, { tenant: req.swagger.tenant });
 
         if (Application.hooks['*'] && Application.hooks['*'].afterRemove) {
           removedDocument = await Application.hooks['*'].afterRemove(req, { ...removedDocument, result }, Application);
@@ -143,7 +180,7 @@ const controllers = (Application) => {
       debug('.findOne called');
       const data = req.swagger.params.data.value;
       try {
-        const result = await services.findOne(req.swagger.apiPath, data);
+        const result = await services.findOne(req.swagger.apiPath, data, {}, { tenant: req.swagger.tenant });
         return res.json(result);
       } catch (err) {
         return next(err);
@@ -274,7 +311,7 @@ const controllers = (Application) => {
         if (distinct && distinct.length > 0) {
           const ids = await services.distinct(req.swagger.apiPath, distinct, searchParams.q);
           const docs = await Promise.all(
-            ids.map(id => services.findOne(req.swagger.apiPath, { [distinct]: id }, {})),
+            ids.map((id) => services.findOne(req.swagger.apiPath, { [distinct]: id }, {})),
           );
           result = {
             docs,
@@ -285,7 +322,7 @@ const controllers = (Application) => {
             distinct: true,
           };
         } else {
-          result = await services.search(req.swagger.apiPath, {}, searchParams, populateFields);
+          result = await services.search(req.swagger.apiPath, {}, searchParams, populateFields, { tenant: req.swagger.tenant });
         }
 
         if (Application.hooks['*'] && Application.hooks['*'].afterSearch) {

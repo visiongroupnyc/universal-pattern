@@ -4,7 +4,7 @@ const services = (Application) => {
   const { db, getModule } = Application;
   debug('services constructor called');
   return {
-    search: async (endpoint, query, pages = {}, fields = {}) => {
+    search: async (endpoint, query, pages = {}, fields = {}, opts = {}) => {
       const collection = getModule(endpoint);
       debug('.search called', collection, query, pages, fields);
       return new Promise((resolve, reject) => {
@@ -24,9 +24,9 @@ const services = (Application) => {
             msg: 'paginate method not found',
           });
         }
-        return db[collection].paginate(pages.q || {}, fields, p)
-          .then(docs => resolve(docs))
-          .catch(err => reject(err));
+        return db[collection].paginate(pages.q || {}, fields, p, opts)
+          .then(resolve)
+          .catch(reject);
       });
     },
     today: async (endpoint) => {
@@ -45,107 +45,81 @@ const services = (Application) => {
         const tomorow = new Date(this.moment(today).add(1, 'days'));
 
         db[collection].paginate({ $and: [{ added: { $gte: today } }, { added: { $lte: tomorow } }] }, {}, p)
-          .then(docs => resolve(docs))
-          .catch(err => reject(err));
+          .then(resolve)
+          .catch(reject);
       });// end promise
     },
 
-    insert: async (endpoint, params) => {
+    insert: async (endpoint, data, opts = {}) => {
       const collection = getModule(endpoint);
-      params.added = new Date();
-      debug(`.insert called: ${JSON.stringify(params)}`);
-
-      return new Promise((resolve, reject) => {
-        db[collection].insert(params, (err, doc) => (err ? reject(err) : resolve(doc)));
-      });
+      data.added = new Date();
+      debug(`.insert called: ${JSON.stringify(data)}`);
+      const inserted = await db[collection].asyncInsert(data, opts);
+      return inserted;
     },
 
-    findOne: async (endpoint, query = {}, props = {}) => {
+    findOne: async (endpoint, query = {}, props = {}, opts = {}) => {
       debug('findOne called: ', endpoint, query, props);
       const collection = getModule(endpoint);
       if (query._id) query._id = db.ObjectId(query._id);
-      return new Promise((resolve, reject) => {
-        db[collection].findOne(query, props, (err, doc) => (err ? reject(err) : resolve(doc)));
-      });
+      const result = await db[collection].asyncFindOne(query, props, opts);
+      return result;
     },
 
-    insertOrCount: async (endpoint, params) => {
+    insertOrCount: async (endpoint, params, opts = {}) => {
       const collection = getModule(endpoint);
       params.count = 1;
 
-      return new Promise((resolve, reject) => {
-        const q = {};
-        q[params._criterial] = params._unique;
-        delete params._criterial;
-        delete params._unique;
+      const q = {};
+      q[params._criterial] = params[params._criterial];
+      delete params._criterial;
+      const document = await db[collection].asyncFindOne(q, {}, opts);
 
-        db[collection].findOne(q, {}, (err, doc) => {
-          if (err) return reject(err);
-          if (doc === null) {
-            return this.insert(endpoint, params)
-              .then(data => resolve(data))
-              .catch(err2 => reject(err2));
-          }
-          return this.update(endpoint, doc._id, Object.assign({}, params, { count: doc.count + 1 }))
-            .then(data => resolve(data))
-            .catch(err3 => reject(err3));
-        });
-      });
+      if (!document) {
+        const inserted = await db[collection].asyncInsert(params, opts);
+        return inserted;
+      }
+      await db[collection].asyncUpdate({ _id: db.ObjectId(String(document._id)) }, { $inc: { count: 1 } }, opts);
+      const finalDocument = await db[collection].asyncFindOne({ _id: db.ObjectId(String(document._id)) }, {}, opts);
+      return finalDocument;
     },
-    remove: async (endpoint, _id) => {
+    remove: async (endpoint, _id, opts = {}) => {
       const collection = getModule(endpoint);
-      return new Promise((resolve, reject) => {
-        db[collection].remove({ _id: db.ObjectId(_id) }, (err, doc) => (err ? reject(err) : resolve(doc)));
-      });
+      const removed = await db[collection].asyncRemove({ _id: db.ObjectId(_id) }, opts);
+      return removed;
     },
 
-    removeAll: async (endpoint, query = { a: 1 }) => {
+    removeAll: async (endpoint, query = { a: 1 }, opts = {}) => {
       const collection = getModule(endpoint);
-      return new Promise((resolve, reject) => {
-        db[collection].remove(query, (err, doc) => (err ? reject(err) : resolve(doc)));
-      });
+      return db[collection].asyncRemove(query, opts);
     },
-    update: async (endpoint, _id, data = {}, opts = { updated: true, set: true }) => {
+    update: async (endpoint, _id, data = {}, options = { updated: true, set: true }, opts = {}) => {
       const collection = getModule(endpoint);
-      return new Promise((resolve, reject) => {
-        let query = {};
-        if (opts.updated) data.updated = new Date();
-        if (opts.set) query = { $set: data };
-        else query = data;
-        debug('.update called:', endpoint, _id, data);
-        db[collection].update({
-          _id: db.ObjectId(_id),
-        }, query, (err, doc) => {
-          if (err) return reject(err);
-          return resolve(doc);
-        });
-      });
+      let query = {};
+      if (options.updated) data.updated = new Date();
+      if (options.set) query = { $set: data };
+      else query = data;
+      debug('.update called:', endpoint, _id, data, options, opts);
+      const updated = await db[collection].asyncUpdate({ _id: db.ObjectId(_id) }, query, opts);
+      return updated;
     },
 
-    updateByFilter: async (endpoint, query = {}, data, opts = { updated: true, set: true }) => {
-      debug('updateByFilter called: ', endpoint, query, data, opts);
-      return new Promise((resolve, reject) => {
-        let rData = data;
-        const collection = getModule(endpoint);
-        if (opts.updated) data.updated = new Date();
-        if (opts.set) rData = { $set: data };
+    updateByFilter: async (endpoint, query = {}, data, options = { updated: true, set: true }, opts = {}) => {
+      debug('updateByFilter called: ', endpoint, query, data, options, opts);
+      let rData = data;
+      const collection = getModule(endpoint);
+      if (options.updated) data.updated = new Date();
+      if (options.set) rData = { $set: data };
 
-        db[collection].update(query, rData, { multi: true }, (err, doc) => {
-          if (err) return reject(err);
-          return resolve(doc);
-        });
-      });
+      const updated = await db[collection].asyncUpdate(query, rData, { ...opts, multi: true });
+      return updated;
     },
 
-    count: async (endpoint, query) => {
+    count: async (endpoint, query, opts = {}) => {
       debug('count called');
       const collection = getModule(endpoint);
-      return new Promise((resolve, reject) => {
-        db[collection].find(query).count((err, doc) => {
-          if (err) return reject(err);
-          return resolve(doc);
-        });
-      });
+      const total = await db[collection].asyncCount(query, opts);
+      return total;
     },
 
     getLast: async (endpoint, query = {}, fields = {}) => {
@@ -160,15 +134,11 @@ const services = (Application) => {
       });
     },
 
-    find: async (endpoint, query = {}, fields = {}) => {
+    find: async (endpoint, query = {}, fields = {}, opts = {}) => {
       const collection = getModule(endpoint);
       debug('.find called: ', collection, query);
-      return new Promise((resolve, reject) => {
-        db[collection].find(query, fields, (err, docs) => {
-          if (err) return reject(err);
-          return resolve(docs);
-        });
-      });
+      const data = await db[collection].asyncFind(query, fields, opts);
+      return data;
     },
 
     distinct: async (endpoint, field = '_id', query = {}) => {

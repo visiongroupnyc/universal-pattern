@@ -1,0 +1,105 @@
+paths:
+  /comments:
+    get:
+      tags:
+        - comments
+      summary: comments list
+      x-swagger-router-controller: universal.search
+      parameters:
+        - $ref: '#/parameters/q'
+        - $ref: '#/parameters/page'
+        - $ref: '#/parameters/sorting'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/fields'
+
+      responses:
+        '200':
+          description: comments list
+          schema:
+            $ref: '#/definitions/comment'
+
+    delete:
+      tags:
+        - comments
+      summary: delete comment
+      x-swagger-router-controller: universal.remove
+      parameters:
+        - name: _id
+          in: query
+          required: true
+          type: string
+      responses:
+        '200':
+          description: deleted comment
+          schema:
+            $ref: '#/definitions/comment'
+
+    put:
+      tags:
+        - comments
+      summary: insert new comment
+      x-swagger-router-controller: universal.insert
+      parameters:
+        - name: modeldata
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/commentInput'
+      responses:
+        '200':
+          description: comment added
+          schema:
+            $ref: '#/definitions/comment'
+
+definitions:
+  commentInput:
+    type: object
+    properties:
+      carId:
+        type: string
+        format: mongoId
+        x-swagger-lookup:
+          collection: cars
+          populate:
+            - _id
+            - name
+            - brands
+      userId:
+        type: string
+        format: mongoId
+        x-swagger-lookup:
+          collection: users
+          populate:
+            - _id
+            - firstname
+            - lastname
+      comment:
+        type: string
+
+  comment:
+    type: object
+    properties:
+      userId:
+        type: string
+      users:
+        type: object
+        properties:
+          _id:
+            type: string
+          firstname:
+            type: string
+          lastname:
+            type: string
+      carId:
+        type: string
+      cars:
+        type: object
+        properties:
+          _id:
+            type: string
+          name:
+            type: string
+          brands:
+            type: object
+      comment:
+        type: string

@@ -7,6 +7,11 @@ This is a [Node.js](https://nodejs.org/en/) module available through the
 ## Powered by [Cesar Casas](https://www.linkedin.com/in/cesarcasas)
 ## Examples
 
+See the `test` folder
+```bash
+$ cd test
+$ node index
+```
 ### Simple social network API with Universal Pattern
 * (Universal Pattern Example)[https://github.com/lortmorris/up-example]
 
@@ -27,6 +32,8 @@ $ npm install express config --save
 Create the app.js file, and put this code inside.
 Important: this project use 'config' npm package. Install this first. Then, create 'config' folder and default.json file into it.
 
+!Important: remember set both params for connection.mongodb, the uri and the database name.
+
 default.json example:
 ```javascript
 {
@@ -37,7 +44,8 @@ default.json example:
   "version": "0.1",
   "connection": {
     "mongodb": {
-      "uri": "mongodb://127.0.0.1/uptest"
+      "uri": "mongodb://127.0.0.1",
+      "name": "uptest"
     }
   }
 }
@@ -78,14 +86,9 @@ up(app, {
   production: process.env.NODE_ENV === 'production',
   database: {
     uri: config.get('connection.mongodb.uri'),
+    name: config.get('connection.mongodb.name'),
   },
-  routeController: (req, res, next, props) => {
-    if (props['x-swagger-protected']) {
-      const todo = passport.authenticate('jwt', { session: false });
-      return todo(req, res, next);
-    }
-    return next();
-  }
+  routeController: (req, res, next, props) => next(),
 })
   .then((upInstance) => server.listen(port, () => console.info(`listen *:${port}`)))
   .catch(err => console.error('Error initializing ', err));
@@ -208,6 +211,12 @@ $ node app.js
 Open your browser and go to (http://localhost:5000/services/docs)
 
 
+# Magic props when define you swagger.
+
+## startAt and endAt
+Automatic this props will converted into Date ISO Object.
+
+
 # Options object
 ```javascript
 swagger: { // Swagger property, required.
@@ -219,6 +228,7 @@ compress: false, // is true, the add compression mws into app. Default is false
 cors: false, // is true, add cors into header response. Default is false
 database: { // the database (mongodb) properties
   uri: config.get('connection.mongodb.uri'), // database (mongodb) uri connection string
+  name: config.get('connection.mongodb.name'),
 },
 ```
 ---
@@ -702,6 +712,27 @@ the prop x-swagger-lookup within a prop definition indicate to UP is necessary h
 
 x-swagger-lookup should be use only for PUT and UPDATE methods, never for GET or DELETE.
 
+## unique prop
+The prop `x-swagger-unique` indicate to Universal Pattern the prop should be check if the value already exists or not.
+
+### Example
+```yaml
+definitions:
+  userInput:
+    type: object
+    properties:
+      firstname:
+        type: string
+        required: true
+      lastname:
+        type: string
+        required: true
+      email:
+        type: string
+        format: email
+        required: true
+        x-swagger-unique: true
+```
 ---
 
 # the param 'q'
@@ -802,8 +833,14 @@ For a real example, see (https://github.com/lortmorris/up-example)
 - coordinates field fixed.
 
 ## Feb 25, 2020
-
 - Hotfix: remove by _id
+
+## May 17, 2021
+- Removed nodejs package
+- New vg-mongo package implemented (Vision Group MongoDB driver written by Cesar Casas)
+
+## June 16, 2021
+- Reeplaced MongoJS for vg-mongo
 
 # License
 [MIT](LICENSE)

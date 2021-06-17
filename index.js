@@ -1,4 +1,4 @@
-const mongojs = require('mongojs');
+const vgMongo = require('vg-mongo');
 const yaml = require('js-yaml');
 const fs = require('fs');
 const lodash = require('lodash');
@@ -8,28 +8,28 @@ const express = require('express');
 const compression = require('compression');
 const cors = require('cors');
 const debug = require('debug')('universal-pattern');
+
 const paginate = require('./libs/paginate');
 const services = require('./services');
 const controllers = require('./controllers');
 const swaggerMetadata = require('./libs/swagger-metadata');
 const swaggerRouter = require('./libs/swagger-router');
 
-const hasMWS = (app, module = 'none') => app._router.stack.filter(mws => mws.name === module).length > 0;
+const hasMWS = (app, module = 'none') => app._router.stack.filter((mws) => mws.name === module).length > 0;
 
-const getModule = url => url.replace('/', '')
+const getModule = (url) => url.replace('/', '')
   .split('?')
   .shift()
   .split('/')
   .shift();
 
-
-const addHook = UP => (endpoint, method, cb) => {
+const addHook = (UP) => (endpoint, method, cb) => {
   debug('adding hook: ', endpoint, method);
   if (!UP.hooks[endpoint]) UP.hooks[endpoint] = {};
   UP.hooks[endpoint][method] = cb;
 };
 
-const registerController = UP => (name, controller) => {
+const registerController = (UP) => (name, controller) => {
   debug('reginstering controller: ', name);
   if (name in UP.controllers) throw Error(`Controller ${name} already register`);
   UP.controllers[name] = controller;
@@ -60,11 +60,12 @@ const universalPattern = (app = express(), options = {}) => {
     production: true,
     database: {
       uri: 'mongodb://localhost:27017/up',
+      name: 'upexample',
     },
     routeController: (req, res, next) => { next(); },
   }, options);
 
-  const db = mongojs(localOptions.database.uri);
+  const db = vgMongo(localOptions.database.uri, localOptions.database.name);
   const UP = {
     localOptions,
     db,
@@ -86,7 +87,7 @@ const universalPattern = (app = express(), options = {}) => {
         }
         return false;
       }), fs.readFileSync(path.join(__dirname, './swagger', 'index.yaml'), 'utf8').toString()]
-      .map(file => yaml.safeLoad(file))
+      .map((file) => yaml.load(file))
       .reduce((acc, current) => lodash.merge(acc, current), {});
 
     UP.swagger = lodash.merge({ ...yamlContent }, localOptions.swagger, { basePath: localOptions.swagger.baseDoc });

@@ -1,0 +1,13 @@
+{
+  "basePath": "/services",
+  "host": "localhost",
+  "port": 5000,
+  "name": "univesal-pattern-example",
+  "version": "0.2",
+  "connection": {
+    "mongodb": {
+      "uri": "mongodb://127.0.0.1",
+      "name": "upexample"
+    }
+  }
+}

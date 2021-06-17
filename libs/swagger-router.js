@@ -3,9 +3,8 @@ const debug = require('debug')('universal-pattern:libs:swagger-router');
 const swaggerRouter = (Application) => {
   const { app, controllers, swagger } = Application;
   const { paths } = swagger;
-  const swaggerRouterManager = props => (req, res, next) => {
-    return Application.localOptions.routeController(req, res, next, props);
-  };
+  const swaggerRouterManager = (props) => (req, res, next) => Application.localOptions.routeController(req, res, next, props);
+
   Object.entries(paths)
     .forEach(([path, value]) => {
       Object.entries(value)

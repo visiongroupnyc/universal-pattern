@@ -24,7 +24,6 @@ const getParameters = (swagger, url, method) => {
   return {};
 };
 
-
 const validString = (req, method, prop, meta) => {
   debug('validString called: ', method, prop, meta);
   let n;
@@ -69,7 +68,6 @@ const validNumber = (req, method, prop, meta) => {
   return n || meta.default || p;
 };
 
-
 const validBoolean = (req, method, prop, meta) => {
   debug('validBoolean: ', prop, meta);
   const p = req[method][prop];
@@ -80,7 +78,6 @@ const validBoolean = (req, method, prop, meta) => {
   }
   return Boolean(meta.default);
 };
-
 
 const validArray = (req, method, prop, meta) => {
   debug('validArray: ', prop, meta);
@@ -139,7 +136,6 @@ const validObject = (req, method, prop, meta) => {
   return {};
 };
 
-
 const validateParameters = (req, params, level = {}) => {
   debug('validateParameters called: ', params, level);
   Object.entries(params)
@@ -194,7 +190,6 @@ const validateParameters = (req, params, level = {}) => {
         level = { ...level, [k]: req[method][k] };
         return level;
       } catch (err) {
-        console.error('invalid model data validation: ', err);
         throw Error(`invalid model data validation: ${err.toString()}`);
       }
     });
@@ -205,7 +200,7 @@ const validateParameters = (req, params, level = {}) => {
 const swaggerMetadata = (Application) => {
   debug('swaggerMetadata constructor called');
   const { swagger } = Application;
-  const getPath = url => url.split('?').shift().replace(swagger.basePath, '');
+  const getPath = (url) => url.split('?').shift().replace(swagger.basePath, '');
 
   return (req, res, next) => {
     const url = getPath(req.url);
@@ -213,6 +208,7 @@ const swaggerMetadata = (Application) => {
     req.swagger = {
       params: {},
       apiPath: url,
+      tenant: req?.headers?.tenant,
     };
 
     debug('swaggerMetadata called: ', req.url, url, method);
@@ -230,8 +226,8 @@ const swaggerMetadata = (Application) => {
           });
         }
 
-
         if (data.modeldata && data.modeldata.schema) {
+          req.swagger.params.modeldata['x-swagger-unique'] = [];
           req.swagger.params.modeldata['x-swagger-lookup'] = [];
           if (data.modeldata.schema['x-swagger-model-version']) req.swagger.params['x-swagger-model-version'] = data.modeldata.schema['x-swagger-model-version'];
           else req.swagger.params['x-swagger-model-version'] = 1;
@@ -241,6 +237,9 @@ const swaggerMetadata = (Application) => {
               const item = data.modeldata.schema.properties[key];
               if (item['x-swagger-lookup']) {
                 req.swagger.params.modeldata['x-swagger-lookup'].push({ ...item['x-swagger-lookup'], field: key });
+              }
+              if (item['x-swagger-unique']) {
+                req.swagger.params.modeldata['x-swagger-unique'].push({ ...item['x-swagger-unique'], field: key, item });
               }
             });
           }

@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: 0.0.1
+  version: 0.0.2
   title: UniversalPatter Server test
   termsOfService: 'http://localhost:8000/terms'
 host: 'localhost'
@@ -76,4 +76,10 @@ parameters:
     in: header
     type: string
     description: bearer token
+    required: true
+  tenant:
+    name: tenant
+    in: header
+    type: string
+    description: Tenant name
     required: true

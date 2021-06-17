@@ -1,0 +1,117 @@
+paths:
+  /cars:
+    get:
+      tags:
+        - cars
+      summary: cars list
+      x-swagger-router-controller: universal.search
+      parameters:
+        - $ref: '#/parameters/q'
+        - $ref: '#/parameters/page'
+        - $ref: '#/parameters/sorting'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/fields'
+
+      responses:
+        '200':
+          description: cars list
+          schema:
+            $ref: '#/definitions/car'
+    put:
+      tags:
+        - cars
+      summary: insert new car
+      x-swagger-router-controller: universal.insert
+      parameters:
+        - name: modeldata
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/carInput'
+      responses:
+        '200':
+          description: car added
+          schema:
+            $ref: '#/definitions/car'
+
+    delete:
+      tags:
+        - cars
+      summary: delete car
+      x-swagger-router-controller: universal.remove
+      parameters:
+        - name: _id
+          in: query
+          required: true
+          type: string
+      responses:
+        '200':
+          description: deleted car
+          schema:
+            $ref: '#/definitions/car'
+
+    patch:
+      tags:
+        - cars
+      summary: for updated car document
+      x-swagger-router-controller: universal.update
+      parameters:
+        - name: modeldata
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/carUpdate'
+      responses:
+        '200':
+          description: updated car
+          schema:
+            $ref: '#/definitions/car'
+
+definitions:
+  carInput:
+    type: object
+    properties:
+      name:
+        type: string
+      color:
+        type: string
+        enum:
+          - black
+          - white
+          - blue
+          - green
+          - gray
+          - yellow
+        required: true
+      brandId:
+        type: string
+        format: mongoId
+        x-swagger-lookup:
+          collection: brands
+          populate:
+            - _id
+            - name
+
+  carUpdate:
+    type: object
+    properties:
+      _id:
+        type: string
+        format: mongoId
+
+  car:
+    type: object
+    properties:
+      _id:
+        type: string
+      name:
+        type: string
+      brandId:
+        type: string
+      brands:
+        type: object
+        properties:
+          _id:
+            type: string
+          name:
+            type: string
