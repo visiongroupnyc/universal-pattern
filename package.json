@@ -1,6 +1,6 @@
 {
   "name": "universal-pattern",
-  "version": "1.0.27",
+  "version": "1.0.28",
   "description": "This is easy way to implement universal pattern, swagger and restfull api",
   "main": "index.js",
   "scripts": {
@@ -40,7 +40,7 @@
     "express": "^4.17.1",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
-    "vg-mongo": "^1.0.6"
+    "vg-mongo": "^1.0.7"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
