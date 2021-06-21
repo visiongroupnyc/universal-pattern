@@ -842,5 +842,9 @@ For a real example, see (https://github.com/lortmorris/up-example)
 ## June 16, 2021
 - Reeplaced MongoJS for vg-mongo
 
+## June 21, 2021
+- Added support for use Universal Pattern without MongoDB connection.
+- Fix error handler
+
 # License
 [MIT](LICENSE)

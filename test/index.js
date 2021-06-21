@@ -8,7 +8,7 @@ const port = config.get('port');
 const app = express();
 const server = http.createServer(app);
 
-up(app, {
+const params = {
   swagger: {
     baseDoc: config.get('basePath'),
     host: `${config.get('host')}:${config.get('port')}`,
@@ -29,10 +29,16 @@ up(app, {
   compress: true,
   cors: true,
   production: process.env.NODE_ENV === 'production',
-  database: {
-    uri: config.get('connection.mongodb.uri'),
-  },
   routeController: (req, res, next) => next(),
-})
+};
+
+if (config.get('connection') && config.get('connection.mongodb')) {
+  params.database = {
+    uri: config.get('connection.mongodb.uri'),
+    name: config.get('connection.mongodb.name'),
+  };
+}
+
+up(app, params)
   .then(() => server.listen(port, () => console.info(`listen *:${port}`)))
   .catch((err) => console.error('Error initializing ', err));

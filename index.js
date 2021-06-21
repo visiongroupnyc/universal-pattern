@@ -16,7 +16,7 @@ const swaggerMetadata = require('./libs/swagger-metadata');
 const swaggerRouter = require('./libs/swagger-router');
 
 const hasMWS = (app, module = 'none') => app._router.stack.filter((mws) => mws.name === module).length > 0;
-
+let db = null;
 const getModule = (url) => url.replace('/', '')
   .split('?')
   .shift()
@@ -36,7 +36,7 @@ const registerController = (UP) => (name, controller) => {
 };
 
 const universalPattern = (app = express(), options = {}) => {
-  const localOptions = lodash.merge({
+  const defaultOptions = {
     swagger: {
       baseDoc: '/service',
       host: 'localhost',
@@ -58,14 +58,22 @@ const universalPattern = (app = express(), options = {}) => {
     compress: false,
     cors: false,
     production: true,
-    database: {
-      uri: 'mongodb://localhost:27017/up',
-      name: 'upexample',
-    },
     routeController: (req, res, next) => { next(); },
-  }, options);
+  };
 
-  const db = vgMongo(localOptions.database.uri, localOptions.database.name);
+  if (options.database) {
+    defaultOptions.database = {
+      uri: 'mongodb://localhost:27017',
+      name: 'upexample',
+    };
+  }
+
+  const localOptions = lodash.merge(defaultOptions, options);
+
+  if (localOptions.database) {
+    db = vgMongo(localOptions.database.uri, localOptions.database.name);
+  }
+
   const UP = {
     localOptions,
     db,

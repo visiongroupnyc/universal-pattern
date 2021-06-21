@@ -31,6 +31,10 @@ const controllers = (Application) => {
   return {
     'universal.insert': async (req, res, next) => {
       debug('.insert called: ', req.swagger);
+      if (!db) {
+        throw new Error('Cant access to universal.* without MongoDB Connection');
+      }
+
       let params = req.swagger.params.modeldata.value;
 
       try {
@@ -82,6 +86,10 @@ const controllers = (Application) => {
     },
 
     'universal.insertOrCount': async (req, res, next) => {
+      if (!db) {
+        throw new Error('Cant access to universal.* without MongoDB Connection');
+      }
+
       const params = req.swagger.params.modeldata.value;
       try {
         if (req.swagger.params.modeldata && req.swagger.params.modeldata['x-swagger-unique'] && req.swagger.params.modeldata['x-swagger-unique'].length > 0) {
@@ -112,6 +120,10 @@ const controllers = (Application) => {
       const { _id } = { ...data };
 
       debug('.update called: ', data);
+      if (!db) {
+        throw new Error('Cant access to universal.* without MongoDB Connection');
+      }
+
       try {
         if (Application.hooks['*'] && Application.hooks['*'].beforeUpdate) {
           data = await Application.hooks['*'].beforeUpdate(req, data, Application);
@@ -144,6 +156,10 @@ const controllers = (Application) => {
     'universal.remove': async (req, res, next) => {
       const { _id } = req.swagger.params;
       debug('.remove called: ', _id);
+      if (!db) {
+        throw new Error('Cant access to universal.* without MongoDB Connection');
+      }
+
       try {
         if (Application.hooks['*'] && Application.hooks['*'].beforeRemove) {
           await Application.hooks['*'].beforeRemove(req, _id, Application);
@@ -169,6 +185,10 @@ const controllers = (Application) => {
     },
     'universal.today': async (req, res, next) => {
       debug('.today called');
+      if (!db) {
+        throw new Error('Cant access to universal.* without MongoDB Connection');
+      }
+
       try {
         const data = await services.today(req.swagger.apiPath);
         return res.json(data);
@@ -178,6 +198,10 @@ const controllers = (Application) => {
     },
     'universal.findOne': async (req, res, next) => {
       debug('.findOne called');
+      if (!db) {
+        throw new Error('Cant access to universal.* without MongoDB Connection');
+      }
+
       const data = req.swagger.params.data.value;
       try {
         const result = await services.findOne(req.swagger.apiPath, data, {}, { tenant: req.swagger.tenant });
@@ -188,6 +212,9 @@ const controllers = (Application) => {
     },
     'universal.search': async (req, res, next) => {
       debug('.search called: ', req.swagger.params);
+      if (!db) {
+        throw new Error('Cant access to universal.* without MongoDB Connection');
+      }
 
       let { q, sorting } = req.swagger.params;
       const {

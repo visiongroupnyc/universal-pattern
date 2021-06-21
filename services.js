@@ -3,6 +3,32 @@ const debug = require('debug')('universal-pattern:services');
 const services = (Application) => {
   const { db, getModule } = Application;
   debug('services constructor called');
+  if (!db) {
+    const methods = [
+      'search',
+      'today',
+      'insert',
+      'findOne',
+      'insertOrCount',
+      'remove',
+      'removeAll',
+      'update',
+      'updateByFilter',
+      'count',
+      'find',
+      'getLast',
+      'modify',
+      'aggregate',
+      'distinct',
+    ].reduce((acc, actual) => {
+      acc[actual] = () => {
+        throw new Error('DB no setted');
+      };
+      return acc;
+    }, {});
+    return methods;
+  }
+
   return {
     search: async (endpoint, query, pages = {}, fields = {}, opts = {}) => {
       const collection = getModule(endpoint);

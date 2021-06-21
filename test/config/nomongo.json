@@ -1,0 +1,8 @@
+{
+  "basePath": "/services",
+  "host": "localhost",
+  "port": 5000,
+  "name": "univesal-pattern-example",
+  "version": "0.2",
+  "connection": null
+}

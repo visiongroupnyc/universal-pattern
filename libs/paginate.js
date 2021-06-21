@@ -31,8 +31,12 @@ const privPaginate = (collection) => async (query, fields, options, opts = {}) =
 
 const paginate = (Application) => {
   debug('.paginate constructor called');
+  const {
+    db,
+  } = Application;
 
-  Application.db.getCollectionNames((err, collections) => {
+  if (!db) return;
+  db.getCollectionNames((err, collections) => {
     if (err) return;
     collections
       .concat(

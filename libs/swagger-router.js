@@ -5,6 +5,11 @@ const swaggerRouter = (Application) => {
   const { paths } = swagger;
   const swaggerRouterManager = (props) => (req, res, next) => Application.localOptions.routeController(req, res, next, props);
 
+  app.use((req, res, next) => {
+    req.Application = Application;
+    next();
+  });
+
   Object.entries(paths)
     .forEach(([path, value]) => {
       Object.entries(value)
@@ -18,24 +23,23 @@ const swaggerRouter = (Application) => {
 
           debug('registering: ', method, finalpath, props['x-swagger-router-controller']);
           app[method](finalpath, swaggerRouterManager(props), (req, res, next) => {
-            try {
-              debug('request: ', req.method, req.url, req.query);
-              handler()(req, res, (err) => {
-                if (err) {
-                  debug('Controller catch Error: ', err);
-                  res.status(503).json({
-                    code: 'controller_error_catched',
-                    message: err.toString(),
-                    success: false,
-                  }).end();
-                } else {
-                  next();
-                }
+            debug('request: ', req.method, req.url, req.query);
+            handler()(req, res, (err) => {
+              if (err) {
+                debug('Controller catch Error: ', err);
+                res.status(503).json({
+                  code: 'controller_error_catched',
+                  message: err.toString(),
+                  success: false,
+                }).end();
+              } else {
+                next();
+              }
+            })
+              .catch((err) => {
+                console.info('Error duro: ', err);
+                res.status(500).end(err.toString());
               });
-            } catch (err) {
-              debug('Error: ', err);
-              res.status(500).end(err.toString());
-            }
           });
         });
     });
