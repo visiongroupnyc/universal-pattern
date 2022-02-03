@@ -246,27 +246,29 @@ search into collection.
 return Promise with result.
 
 - `module`: string, the module name. Ex: '/users'
-- `query`: just a MongoDB query.
-- `page`: is a object with pagination and sorting properties:
+- `empty object`
+- `searchParams`: is a object with pagination and sorting properties:
 ```
 {
   limit: integer, // default is 30
   page: integer, // default is 1
   sorting: string // string with props separated by ',' ex: 'name:desc,age:asc'
+  q: object with mongodb query
 }
 ```
 
 Example:
 ```javascript
 const result = await upInstance.services.search('/users',
-{
-  age: { $gt: 5 },
-},
-{
-  page: 1,
-  limit: 10,
-  sorting: 'name:desc',
-});
+  {},
+  {
+    page: 1,
+    limit: 10,
+    sorting: 'name:desc',
+    q: {
+      age: { $gt: 5 },
+    },
+  });
 ```
 ## today
 Get the last 500 documents inserted today.

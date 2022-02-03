@@ -1,6 +1,6 @@
 {
   "name": "universal-pattern",
-  "version": "1.0.29",
+  "version": "1.0.30",
   "description": "This is easy way to implement universal pattern, swagger and restfull api",
   "main": "index.js",
   "scripts": {
