@@ -1,102 +1,78 @@
 # Universal Pattern
-Universal Pattern is single and easy way to build professionals API using MongoDB and Node.js.
+Universal Pattern es una librería que permite de una forma muy simple crear microservicios y endpoint utilizando [Node.js](https://nodejs.org), [Swagger](https://editor.swagger.io) y [MongoDB](https://www.mongodb.com/).
 
-This is a [Node.js](https://nodejs.org/en/) module available through the
-[npm registry](https://www.npmjs.com/).
 
-## Powered by [Cesar Casas](https://www.linkedin.com/in/cesarcasas)
-## Examples
+Powered by [Cesar Casas](https://www.linkedin.com/in/cesarcasas)
+
+Funded by [Vision Group NYC](https://visiongroup.nyc)
+
+## Contenido
+
+- [Requerimientos](#-Requerimientos)
+- [Instalación](#-Instalación)
+- [Implementación](#-Implementación)
+- [Documentation](#-documentation)
+- [Upgrading](#-upgrading)
+- [How to Contribute](#-how-to-contribute)
+- [Code of Conduct](#code-of-conduct)
+- [License](#-license)
+
+## 📋 Requerimientos
+Antes de comenzar a trabajar con Universal Pattern, debemos tener instalado previamente
+* Node.js (version 16 o superior)
+* MongoDB
+
+
+## Test
 
 See the `test` folder
 ```bash
 $ cd test
 $ node index
 ```
-### Simple social network API with Universal Pattern
-* (Universal Pattern Example)[https://github.com/lortmorris/up-example]
 
-# Instalation
+# Instalación
+
+Recomendamos utilizar Universal Pattern desde un entorno Linux, aunque funcionará sin problemas en entornos Windows y MacOS.
+
 ```bash
 $ npm install universal-pattern --save
 ```
 
-# Implementation
-First, create a new project using npm, and install required modules.
+# Primer modulo
+🎉 Vamos a crear tu primer módulo con Universal Pattern.
+Primero que nada crearemos un proyecto nuevo utilizando npm (el manejador de paquetes de Node.js, deberán tenerlo instalado).
+
 
 ```bash
+$ mkdir up-example
+$ cd up-example
 $ npm init
-$ npm install express config --save
 ```
 
-## creating app.js
-Create the app.js file, and put this code inside.
-Important: this project use 'config' npm package. Install this first. Then, create 'config' folder and default.json file into it.
+El comando npm init nos hará una seríe de preguntas.
+- package name: dejamos el que está por default (up-example), presionamos enter
+- version: presionamos enter.
+- description: podemos indicar o no una descripción, es opcional.
+- entry point: aquí ingresaremos "app.js"
+- test command: aquí ingresaremos "mocha".
+- git repository: nos está preguntando cual será el path o url de nuestro repositorio de git. Presionamos enter.
+- keywords: presionamos enter
+- author: ingresamos nuestro nombre
+- license: presionamos enter
+- Is this OK?: presionamos enter
 
-!Important: remember set both params for connection.mongodb, the uri and the database name.
 
-default.json example:
-```javascript
-{
-  "basePath": "/services",
-  "host": "localhost",
-  "port": 5000,
-  "name": "up-example",
-  "version": "0.1",
-  "connection": {
-    "mongodb": {
-      "uri": "mongodb://127.0.0.1",
-      "name": "uptest"
-    }
-  }
-}
+## Crear directorios
 
+```bash
+$ mkdir swagger
+$ touch app.js
+$ npm install universal-pattern express --save
 ```
 
-```javascript
-const http = require('http');
-const express = require('express');
-const path = require('path');
-const config = require('config');
-const up = require('universal-pattern');
-
-const port = config.get('port');
-const app = express();
-const server = http.createServer(app);
-
-up(app, {
-  swagger: {
-    baseDoc: config.get('basePath'),
-    host: `${config.get('host')}:${config.get('port')}`,
-    folder: path.join(process.cwd(), 'swagger'),
-    info: {
-      version: 10.0,
-      title: 'Universal Pattern Example',
-      termsOfService: 'www.domain.com/terms',
-      contact: {
-        email: 'cesarcasas@bsdsolutions.com.ar',
-      },
-      license: {
-        name: 'Apache',
-        url: 'http://www.apache.org/licenses/LICENSE-2.0.html',
-      },
-    },
-  },
-  compress: true,
-  cors: true,
-  production: process.env.NODE_ENV === 'production',
-  database: {
-    uri: config.get('connection.mongodb.uri'),
-    name: config.get('connection.mongodb.name'),
-  },
-  routeController: (req, res, next, props) => next(),
-})
-  .then((upInstance) => server.listen(port, () => console.info(`listen *:${port}`)))
-  .catch(err => console.error('Error initializing ', err));
-```
-* production: if this props is false, we wil have available the interactive documentation (swagger ui)
-
-## Creating models.yaml
-Now, create the folder 'swagger' and put into it the first yaml file (e.g models.yaml)
+## Creando module yaml
+Ahora crearemos el archivo models.yaml dentro del directorio 'swagger'.
 
 ```yaml
 paths:
@@ -201,6 +177,52 @@ definitions:
 
 
 ```
+
+# Creamos app.js
+
+```javascript
+const http = require('http');
+const express = require('express');
+const path = require('path');
+const config = require('config');
+const up = require('universal-pattern');
+
+const port = config.get('port');
+const app = express();
+const server = http.createServer(app);
+
+up(app, {
+  swagger: {
+    baseDoc: config.get('basePath'),
+    host: `${config.get('host')}:${config.get('port')}`,
+    folder: path.join(process.cwd(), 'swagger'),
+    info: {
+      version: 10.0,
+      title: 'Universal Pattern Example',
+      termsOfService: 'www.visiongroup.nyc/terms',
+      contact: {
+        email: 'cesar@visiongroup.nyc',
+      },
+      license: {
+        name: 'Apache',
+        url: 'http://www.apache.org/licenses/LICENSE-2.0.html',
+      },
+    },
+  },
+  compress: true,
+  cors: true,
+  production: process.env.NODE_ENV === 'production',
+  database: {
+    uri: config.get('connection.mongodb.uri'),
+    name: config.get('connection.mongodb.name'),
+  },
+  routeController: (req, res, next, props) => next(),
+})
+  .then((upInstance) => server.listen(port, () => console.info(`listen *:${port}`)))
+  .catch(err => console.error('Error initializing ', err));
+```
+* production: if this props is false, we wil have available the interactive documentation (swagger ui)
+
 
 ## Runing example.
 Finally, run the first UP App.
@@ -595,7 +617,7 @@ put:
       required: true
       schema:
         $ref: '#/definitions/modelInput'
-```    
+```
 The definition should have any name.
 
 

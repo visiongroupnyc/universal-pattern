@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
-  version: 0.0.2
-  title: UniversalPatter Server test
+  version: 0.0.4
+  title: Universal Patter Server test
   termsOfService: 'http://localhost:8000/terms'
 host: 'localhost'
 schemes:
