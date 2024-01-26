@@ -2,15 +2,11 @@ const debug = require('debug')('up:controllers:search');
 
 function searchControllerFactory({
 	Application,
-	db,
 	services,
 }) {
 	debug('Factory called');
 	return async (req, res, next) => {
 		debug('Called');
-		if (!db) {
-			throw new Error('Cant access to universal.* without MongoDB Connection');
-		}
 
 		let { q, sorting } = req.swagger.params;
 		const {

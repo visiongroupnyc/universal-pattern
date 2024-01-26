@@ -1,7 +1,6 @@
 const debug = require('debug')('up:controllers:update');
 
 function updateControllerFactory({
-	db,
 	services,
 	Application,
 }) {
@@ -12,9 +11,6 @@ function updateControllerFactory({
 		const { _id } = { ...data };
 
 		debug('.update called: ', data);
-		if (!db) {
-			throw new Error('Cant access to universal.* without MongoDB Connection');
-		}
 
 		try {
 			if (Application.hooks['*'] && Application.hooks['*'].beforeUpdate) {

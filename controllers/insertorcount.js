@@ -1,7 +1,6 @@
 const debug = require('debug')('up:controllers:insertOrCount');
 
 function insertOrCountControllerFactory({
-	db,
 	services,
 	lookupProcess,
 	uniqueProcess,
@@ -10,9 +9,6 @@ function insertOrCountControllerFactory({
 	debug('Factory called');
 	return async (req, res, next) => {
 		debug('Called');
-		if (!db) {
-			throw new Error('Cant access to universal.* without MongoDB Connection');
-		}
 
 		const params = req.swagger.params.modeldata.value;
 		try {

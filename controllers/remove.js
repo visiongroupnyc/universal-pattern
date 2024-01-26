@@ -1,16 +1,12 @@
 const debug = require('debug')('up:controllers:remove');
 
 function removeControllerFactory({
-	db,
 	services,
 	Application,
 }) {
 	debug('Factory called');
 	return async (req, res, next) => {
 		debug('Called');
-		if (!db) {
-			throw new Error('Cant access to universal.* without MongoDB Connection');
-		}
 
 		const { _id } = req.query;
 

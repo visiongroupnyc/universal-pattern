@@ -1,7 +1,6 @@
 const debug = require('debug')('up:controllers:insert');
 
 function insertControllerFactory({
-	db,
 	services,
 	lookupProcess,
 	Application,
@@ -11,9 +10,6 @@ function insertControllerFactory({
 	debug('Factory called');
 	return async (req, res, next) => {
 		debug('Called');
-		if (!db) {
-			throw new Error('Cant access to universal.* without MongoDB Connection');
-		}
 
 		let params = req.swagger.params.modeldata.value;
 
