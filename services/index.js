@@ -73,6 +73,10 @@ const services = (Application) => {
 			getModule,
 			db,
 		}),
+		update: updateFactory({
+			getModule,
+			db,
+		}),
 
 		updateByFilter: async (endpoint, query = {}, data, options = { updated: true, set: true }, opts = {}) => {
 			debug('updateByFilter called: ', endpoint, query, data, options, opts);

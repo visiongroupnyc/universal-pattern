@@ -1,14 +1,22 @@
 const debug = require('debug')('up:services:remove');
+const { ObjectId } = require('vg-mongo');
 
 function removeFactory({
 	getModule,
 	db,
 }) {
-	return async (endpoint, _id, opts = {}) => {
+	debug('Factory called');
+	return async (endpoint, _id) => {
+		debug('Called');
 		const collection = getModule(endpoint);
-		debug(`remove called with id: ${JSON.stringify(_id)}`);
-		const removed = await db[collection].asyncRemove({ _id: db.ObjectId(_id) }, opts);
-		return removed;
+		const removedDocument = await db[collection].findOne({ _id: new ObjectId(_id) });
+		if (!removedDocument) throw new Error('_id not found');
+		const removedResult = await db[collection].deleteOne({ _id: new ObjectId(_id) });
+
+		return {
+			...removedDocument,
+			result: removedResult,
+		};
 	};
 }
 

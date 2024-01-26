@@ -12,7 +12,7 @@ function removeControllerFactory({
 			throw new Error('Cant access to universal.* without MongoDB Connection');
 		}
 
-		const { _id } = req.swagger.params;
+		const { _id } = req.query;
 
 		try {
 			if (Application.hooks['*'] && Application.hooks['*'].beforeRemove) {
@@ -22,17 +22,16 @@ function removeControllerFactory({
 				await Application.hooks[req.swagger.apiPath].beforeRemove(req, _id, Application);
 			}
 
-			let removedDocument = await services.findOne(req.swagger.apiPath, { _id: db.ObjectId(_id) }, {});
-			const result = await services.remove(req.swagger.apiPath, _id);
+			let removedDocument = await services.remove(req.swagger.apiPath, _id);
 
 			if (Application.hooks['*'] && Application.hooks['*'].afterRemove) {
-				removedDocument = await Application.hooks['*'].afterRemove(req, { ...removedDocument, result }, Application);
+				removedDocument = await Application.hooks['*'].afterRemove(req, { ...removedDocument }, Application);
 			}
 			if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].afterRemove) {
-				removedDocument = await Application.hooks[req.swagger.apiPath].afterRemove(req, { ...removedDocument, result }, Application);
+				removedDocument = await Application.hooks[req.swagger.apiPath].afterRemove(req, { ...removedDocument }, Application);
 			}
 
-			return res.json({ ...removedDocument, result });
+			return res.json({ ...removedDocument });
 		} catch (err) {
 			return next(err);
 		}
