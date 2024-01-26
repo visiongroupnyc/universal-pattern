@@ -1,44 +1,44 @@
-const http = require('http');
-const express = require('express');
-const path = require('path');
-const config = require('config');
+const path = require('node:path');
+
 const up = require('../index');
 
-const port = config.get('port');
-const app = express();
-const server = http.createServer(app);
-
+const swaggerFolder = path.join(process.cwd(), 'swagger');
 const params = {
-  swagger: {
-    baseDoc: config.get('basePath'),
-    host: `${config.get('host')}:${config.get('port')}`,
-    folder: path.join(process.cwd(), 'swagger'),
-    info: {
-      version: 10.0,
-      title: 'Universal Pattern Example',
-      termsOfService: 'www.domain.com/terms',
-      contact: {
-        email: 'cesarcasas@bsdsolutions.com.ar',
-      },
-      license: {
-        name: 'Apache',
-        url: 'http://www.apache.org/licenses/LICENSE-2.0.html',
-      },
-    },
-  },
-  compress: true,
-  cors: true,
-  production: process.env.NODE_ENV === 'production',
-  routeController: (req, res, next) => next(),
+	swagger: {
+		baseDoc: process.env.BASEPATH,
+		host: `${process.env.HOST}:${process.env.PORT}`,
+		folder: swaggerFolder,
+		info: {
+			version: 2.0,
+			title: 'Universal Pattern Example',
+			termsOfService: 'www.domain.com/terms',
+			contact: {
+				email: 'cesar@visiongroup.nyc',
+			},
+			license: {
+				name: 'Apache',
+				url: 'http://www.apache.org/licenses/LICENSE-2.0.html',
+			},
+		},
+	},
+	compress: true,
+	cors: true,
+	production: false,
+	routeController: (req, res, next) => next(),
+	port: process.env.PORT,
+	database: {
+		uri: process.env.CONNECTION,
+		name: process.env.DBNAME,
+	},
 };
 
-if (config.get('connection') && config.get('connection.mongodb')) {
-  params.database = {
-    uri: config.get('connection.mongodb.uri'),
-    name: config.get('connection.mongodb.name'),
-  };
+async function init() {
+	try {
+		const upInstance = await up(params);
+		console.info(`UP InstanceId: ${upInstance.instanceId}`);
+	} catch (err) {
+		console.error('Error initializing ', err);
+	}
 }
 
-up(app, params)
-  .then(() => server.listen(port, () => console.info(`listen *:${port}`)))
-  .catch((err) => console.error('Error initializing ', err));
+init();

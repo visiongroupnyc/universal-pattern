@@ -2,7 +2,7 @@ paths:
   /feedlikes:
     get:
       tags:
-        - feedlikes
+        - feed
       summary: feedlikes list
       x-swagger-router-controller: universal.search
       parameters:
@@ -20,7 +20,7 @@ paths:
 
     delete:
       tags:
-        - feedlikes
+        - feed
       summary: delete feedlike
       x-swagger-router-controller: universal.remove
       parameters:
@@ -36,7 +36,7 @@ paths:
 
     put:
       tags:
-        - feedlikes
+        - feed
       summary: insert new feedlike
       x-swagger-router-controller: universal.insert
       parameters:

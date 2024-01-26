@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
-  version: 0.0.2
-  title: UniversalPatter Server test
+  version: 2.0.0
+  title: Universal Patter Server test
   termsOfService: 'http://localhost:8000/terms'
 host: 'localhost'
 schemes:
@@ -59,12 +59,19 @@ parameters:
     type: string
     description: apikey access
     required: true
+  field:
+    name: field
+    in: query
+    type: string
+    default: ''
+    description: field prop
   fields:
     name: fields
     in: query
     type: string
     default: ''
     description: populate fields
+
   coordinates:
     name: coordinates
     in: query
@@ -76,10 +83,4 @@ parameters:
     in: header
     type: string
     description: bearer token
-    required: true
-  tenant:
-    name: tenant
-    in: header
-    type: string
-    description: Tenant name
     required: true

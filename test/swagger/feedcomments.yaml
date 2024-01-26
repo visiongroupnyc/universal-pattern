@@ -2,7 +2,7 @@ paths:
   /feedcomments:
     get:
       tags:
-        - feedcomments
+        - feed
       summary: feedcomments list
       x-swagger-router-controller: universal.search
       parameters:
@@ -20,7 +20,7 @@ paths:
 
     delete:
       tags:
-        - feedcomments
+        - feed
       summary: delete feedcomment
       x-swagger-router-controller: universal.remove
       parameters:
@@ -36,7 +36,7 @@ paths:
 
     put:
       tags:
-        - feedcomments
+        - feed
       summary: insert new feedcomment
       x-swagger-router-controller: universal.insert
       parameters:
@@ -50,6 +50,21 @@ paths:
           description: feedcomment added
           schema:
             $ref: '#/definitions/feedcomment'
+
+  /feedcomments/distinct/users:
+    get:
+      tags:
+        - feed
+      summary: feed list
+      x-swagger-router-controller: universal.distinct
+      parameters:
+        - $ref: '#/parameters/field'
+      responses:
+        '200':
+          description: distinct users id
+          schema:
+            $ref: '#/definitions/feeditem'
+
 
 definitions:
   feedcommentInput:

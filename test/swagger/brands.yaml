@@ -14,7 +14,7 @@ paths:
 
       responses:
         '200':
-          description: reports
+          description: return all brand from database
           schema:
             $ref: '#/definitions/brand'
     put:
@@ -40,10 +40,7 @@ paths:
       summary: delete brand
       x-swagger-router-controller: universal.remove
       parameters:
-        - name: _id
-          in: query
-          required: true
-          type: string
+        - $ref: '#/parameters/by_id'
       responses:
         '200':
           description: deleted brand
@@ -69,12 +66,13 @@ paths:
 
 definitions:
   brandInput:
-    x-swagger-model-version: 1
+    x-swagger-model-version: 2
     type: object
     properties:
       name:
         type: string
         required: true
+
 
   brandUpdate:
     type: object
@@ -91,7 +89,5 @@ definitions:
         format: mongoId
       name:
         type: string
-      totalItems:
-        type: number
       totalCars:
         type: number

@@ -33,8 +33,94 @@ paths:
           description: deleted user
           schema:
             $ref: '#/definitions/feeditem'
+    put:
+      tags:
+        - feed
+      summary: insert new entry into feed
+      x-swagger-router-controller: universal.insert
+      parameters:
+        - name: modeldata
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/feedInput'
+      responses:
+        '200':
+          description: car added
+          schema:
+            $ref: '#/definitions/car'
+      x-swagger-fire:
+        - from:
+          where: "{ carId:$carId }"
+          action: inc
+          value: 1
+          to: cars.totalFeed
+        - from: feed
+          where: "{ carId:$carId, algo: {$gt: 1123 } }"
+          action: count
+          to: cars
+
+  /feed/byid:
+    get:
+      tags:
+        - feed
+      summary: feed list
+      x-swagger-router-controller: universal.findOne
+      parameters:
+        - $ref: '#/parameters/by_id'
+      responses:
+        '200':
+          description: feed by id
+          schema:
+            $ref: '#/definitions/feeditem'
+
+  /feed/count:
+    get:
+      tags:
+        - feed
+      summary: return total items feed
+      x-swagger-router-controller: universal.count
+      responses:
+        '200':
+          description: feed by id
+          schema:
+            $ref: '#/definitions/feeditem'
 
 definitions:
+  feedInput:
+    type: object
+    properties:
+      body:
+        type: string
+        required: true
+        minLength: 4
+      rate:
+        type: integer
+        required: true
+        max: 5
+        min: 1
+        decimals: 0
+      userId:
+        type: string
+        format: mongoId
+        x-swagger-lookup:
+          collection: users
+          populate:
+            - _id
+            - firstname
+            - lastname
+            - avatar
+      carId:
+        type: string
+        format: mongoId
+        x-swagger-lookup:
+          collection: cars
+          populate:
+            - _id
+            - name
+            - color
+            - brands.name
+
   feeditem:
     type: object
     properties:
