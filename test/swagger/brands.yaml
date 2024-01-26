@@ -69,12 +69,13 @@ paths:
 
 definitions:
   brandInput:
-    x-swagger-model-version: 1
+    x-swagger-model-version: 2
     type: object
     properties:
       name:
         type: string
         required: true
+
 
   brandUpdate:
     type: object
@@ -91,7 +92,5 @@ definitions:
         format: mongoId
       name:
         type: string
-      totalItems:
-        type: number
       totalCars:
         type: number
