@@ -1,5 +1,4 @@
 const debug = require('debug')('up:controllers:findOne');
-const { ObjectId } = require('vg-mongo');
 
 function findOneControllerFactory({
 	db,
@@ -14,7 +13,7 @@ function findOneControllerFactory({
 
 		const { _id } = req.query;
 		try {
-			const result = await services.findOne(req.swagger.apiPath, { _id: new ObjectId(_id) });
+			const result = await services.findOne(req.swagger.apiPath, { _id });
 			return res.json(result);
 		} catch (err) {
 			return next(err);

@@ -7,7 +7,7 @@ const insertControllerFactory = require('./insert');
 const insertOrCountControllerFactory = require('./insertorcount');
 const removeControllerFactory = require('./remove');
 const updateControllerFactory = require('./update');
-
+const todayControllerFactory = require('./today');
 
 const controllers = (Application) => {
 	debug('Called');
@@ -76,19 +76,10 @@ const controllers = (Application) => {
 			Application,
 		}),
 
-		'universal.today': async (req, res, next) => {
-			debug('.today called');
-			if (!db) {
-				throw new Error('Cant access to universal.* without MongoDB Connection');
-			}
-
-			try {
-				const data = await services.today(req.swagger.apiPath);
-				return res.json(data);
-			} catch (err) {
-				return next(err);
-			}
-		},
+		'universal.today': todayControllerFactory({
+			db,
+			services,
+		}),
 		'universal.findOne': findOneControllerFactory({ db, services }),
 		'universal.search': searchControllerFactory({ Application, db, services }),
 	};
