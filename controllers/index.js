@@ -5,6 +5,9 @@ const searchControllerFactory = require('./search');
 const findOneControllerFactory = require('./findone');
 const insertControllerFactory = require('./insert');
 const insertOrCountControllerFactory = require('./insertorcount');
+const removeControllerFactory = require('./remove');
+const updateControllerFactory = require('./update');
+
 
 const controllers = (Application) => {
 	debug('Called');
@@ -19,6 +22,7 @@ const controllers = (Application) => {
 		_v: parseInt(req.swagger.params['x-swagger-model-version'], 10),
 		_n: 0,
 		_retry: 0,
+		added: new Date(),
 	});
 
 	const lookupProcess = async (params, lookup) => {
@@ -59,74 +63,19 @@ const controllers = (Application) => {
 			uniqueProcess,
 			injectDefaultModel,
 		}),
-		'universal.update': async (req, res, next) => {
-			let data = req.swagger.params.modeldata.value;
-			const { _id } = { ...data };
 
-			debug('.update called: ', data);
-			if (!db) {
-				throw new Error('Cant access to universal.* without MongoDB Connection');
-			}
+		'universal.update': updateControllerFactory({
+			db,
+			services,
+			Application,
+		}),
 
-			try {
-				if (Application.hooks['*'] && Application.hooks['*'].beforeUpdate) {
-					data = await Application.hooks['*'].beforeUpdate(req, data, Application);
-				}
+		'universal.remove': removeControllerFactory({
+			db,
+			services,
+			Application,
+		}),
 
-				if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].beforeUpdate) {
-					data = await Application.hooks[req.swagger.apiPath].beforeUpdate(req, data, Application);
-				}
-
-				delete data._id;
-				const result = await services.update(req.swagger.apiPath, _id, data, { updated: true, set: true });
-				await services.update(req.swagger.apiPath, _id, {
-					$inc: { _n: 1 },
-				}, { updated: false, set: false });
-
-				let updateDocument = await services.findOne(req.swagger.apiPath, { _id: db.ObjectId(_id) }, {});
-
-				if (Application.hooks['*'] && Application.hooks['*'].afterUpdate) {
-					updateDocument = await Application.hooks['*'].afterUpdate(req, { ...updateDocument, result }, Application);
-				}
-				if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].afterUpdate) {
-					updateDocument = await Application.hooks[req.swagger.apiPath].afterUpdate(req, { ...updateDocument, result }, Application);
-				}
-
-				return res.json({ ...updateDocument, result });
-			} catch (err) {
-				return next(err);
-			}
-		},
-		'universal.remove': async (req, res, next) => {
-			const { _id } = req.swagger.params;
-			debug('.remove called: ', _id);
-			if (!db) {
-				throw new Error('Cant access to universal.* without MongoDB Connection');
-			}
-
-			try {
-				if (Application.hooks['*'] && Application.hooks['*'].beforeRemove) {
-					await Application.hooks['*'].beforeRemove(req, _id, Application);
-				}
-				if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].beforeRemove) {
-					await Application.hooks[req.swagger.apiPath].beforeRemove(req, _id, Application);
-				}
-
-				let removedDocument = await services.findOne(req.swagger.apiPath, { _id: db.ObjectId(_id) }, {});
-				const result = await services.remove(req.swagger.apiPath, _id);
-
-				if (Application.hooks['*'] && Application.hooks['*'].afterRemove) {
-					removedDocument = await Application.hooks['*'].afterRemove(req, { ...removedDocument, result }, Application);
-				}
-				if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].afterRemove) {
-					removedDocument = await Application.hooks[req.swagger.apiPath].afterRemove(req, { ...removedDocument, result }, Application);
-				}
-
-				return res.json({ ...removedDocument, result });
-			} catch (err) {
-				return next(err);
-			}
-		},
 		'universal.today': async (req, res, next) => {
 			debug('.today called');
 			if (!db) {

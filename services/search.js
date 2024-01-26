@@ -4,7 +4,9 @@ function searchFactory({
 	getModule,
 	db,
 }) {
+	debug('Factory called');
 	return async function search(endpoint, query, pages = {}, fields = {}, opts = {}) {
+		debug('Called');
 		const collection = getModule(endpoint);
 
 		const pagination = {

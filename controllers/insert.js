@@ -35,7 +35,6 @@ function insertControllerFactory({
 				);
 			}
 
-			params.added = new Date();
 			if (params.startAt) {
 				params.startAt = new Date(params.startAt);
 			}

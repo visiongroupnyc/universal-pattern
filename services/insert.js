@@ -4,10 +4,11 @@ function insertFactory({
 	getModule,
 	db,
 }) {
+	debug('Factory called');
 	return async (endpoint, data, opts = {}) => {
+		debug('Called');
 		const collection = getModule(endpoint);
 		data.added = new Date();
-		debug(`insert called: ${JSON.stringify(data)}`);
 		const inserted = await db[collection].asyncInsert(data, opts);
 		return inserted;
 	};
