@@ -79,6 +79,18 @@ paths:
           schema:
             $ref: '#/definitions/car'
 
+  /cars/today:
+    get:
+      tags:
+        - cars
+      summary: return all cars added today
+      x-swagger-router-controller: universal.today
+      responses:
+        '200':
+          description: car
+          schema:
+            $ref: '#/definitions/car'
+
 definitions:
   carInput:
     type: object
