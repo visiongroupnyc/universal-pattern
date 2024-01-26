@@ -4,6 +4,8 @@ const findOneFactory = require('./findone');
 const insertFactory = require('./insert');
 const insertOrCountFactory = require('./insertorcount');
 const removeFactory = require('./remove');
+const updateFactory = require('./update');
+
 
 const services = (Application) => {
 	const { db, getModule } = Application;
@@ -65,16 +67,10 @@ const services = (Application) => {
 			const collection = getModule(endpoint);
 			return db[collection].asyncRemove(query, opts);
 		},
-		update: async (endpoint, _id, data = {}, options = { updated: true, set: true }, opts = {}) => {
-			const collection = getModule(endpoint);
-			let query = {};
-			if (options.updated) data.updated = new Date();
-			if (options.set) query = { $set: data };
-			else query = data;
-			debug('.update called:', endpoint, _id, data, options, opts);
-			const updated = await db[collection].asyncUpdate({ _id: db.ObjectId(_id) }, query, opts);
-			return updated;
-		},
+		update: updateFactory({
+			getModule,
+			db,
+		}),
 
 		updateByFilter: async (endpoint, query = {}, data, options = { updated: true, set: true }, opts = {}) => {
 			debug('updateByFilter called: ', endpoint, query, data, options, opts);
