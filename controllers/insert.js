@@ -51,12 +51,15 @@ function insertControllerFactory({
 			}
 
 			let doc = await services.insert(req.swagger.apiPath, injectDefaultModel(params, req));
+
 			if (Application.hooks['*'] && Application.hooks['*'].afterInsert) {
 				params = await Application.hooks['*'].afterInsert(req, params, Application);
 			}
+
 			if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].afterInsert) {
 				doc = await Application.hooks[req.swagger.apiPath].afterInsert(req, doc, Application);
 			}
+
 			return res.json(doc);
 		} catch (err) {
 			return next(err);

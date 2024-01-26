@@ -15,16 +15,9 @@ function insertOrCountFactory({
 			q[params._criterial] = params[params._criterial];
 			delete params._criterial;
 			let documentId = null;
-			// const document = await db[collection].findOne(q, {}, opts);
+			const inserted = await db[collection].insertOne(params, opts);
+			documentId = inserted.insertedId;
 
-			// if (!document) {
-				const inserted = await db[collection].insertOne(params, opts);
-				documentId = inserted.insertedId;
-			// } else {
-				// documentId = document._id;
-			// }
-
-			// await db[collection].updateOne({ _id: new ObjectId(String(documentId)) }, { $inc: { _retry: 1 } }, opts);
 			const finalDocument = await db[collection].findOne({ _id: new ObjectId(String(documentId)) }, {}, opts);
 			return finalDocument;
 		} catch (err) {
