@@ -56,7 +56,6 @@ const controllers = (Application) => {
 
 	return {
 		'universal.insert': insertControllerFactory({
-			db,
 			getModule,
 			services,
 			lookupProcess,
@@ -66,7 +65,6 @@ const controllers = (Application) => {
 		}),
 
 		'universal.insertOrCount': insertOrCountControllerFactory({
-			db,
 			services,
 			lookupProcess,
 			uniqueProcess,
@@ -74,19 +72,16 @@ const controllers = (Application) => {
 		}),
 
 		'universal.update': updateControllerFactory({
-			db,
 			services,
 			Application,
 		}),
 
 		'universal.remove': removeControllerFactory({
-			db,
 			services,
 			Application,
 		}),
 
 		'universal.today': todayControllerFactory({
-			db,
 			services,
 		}),
 		'universal.findOne': findOneControllerFactory({
@@ -94,16 +89,13 @@ const controllers = (Application) => {
 		}),
 		'universal.search': searchControllerFactory({
 			Application,
-			db,
 			services,
 		}),
 		'universal.getLast': getLastControllerFactory({
-			db,
 			services,
 		}),
 		'universal.count': countControllerFactory({
 			services,
-			db,
 		}),
 		'universal.distinct': distinctControllerFactory({
 			services,
