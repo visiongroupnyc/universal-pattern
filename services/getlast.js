@@ -1,20 +1,20 @@
 const debug = require('debug')('up:services:getLast');
 
 function getLastFactory({
-  getModule,
-  db,
+	getModule,
+	db,
 }) {
-  return async (endpoint, query = {}, fields = {}) => {
-    const collection = getModule(endpoint);
-    debug('.getLast: ', collection, query, fields);
-    return new Promise((resolve, reject) => {
-      db[collection].find(query, fields)
-        .sort({ _id: 1 }, (err, doc) => {
-          if (err) return reject(err);
-          return resolve(doc.length > 0 ? doc.pop() : null);
-        });
-    });
-  }
+	debug('Factory called');
+	return async (endpoint, query = {}, fields = {}) => {
+		debug('Called');
+		const collection = getModule(endpoint);
+		const result = await db[collection].find(query, fields)
+			.sort({ _id: 1 })
+			.limit(1)
+			.toArray();
+
+		return result.length > 0 ? result[0] : null;
+	};
 }
 
 module.exports = getLastFactory;

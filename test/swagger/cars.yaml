@@ -67,6 +67,18 @@ paths:
           schema:
             $ref: '#/definitions/car'
 
+  /cars/getlast:
+    get:
+      tags:
+        - cars
+      summary: return the last car added
+      x-swagger-router-controller: universal.getLast
+      responses:
+        '200':
+          description: car
+          schema:
+            $ref: '#/definitions/car'
+
 definitions:
   carInput:
     type: object

@@ -8,6 +8,7 @@ const insertOrCountControllerFactory = require('./insertorcount');
 const removeControllerFactory = require('./remove');
 const updateControllerFactory = require('./update');
 const todayControllerFactory = require('./today');
+const getLastControllerFactory = require('./getlast');
 
 const controllers = (Application) => {
 	debug('Called');
@@ -82,6 +83,7 @@ const controllers = (Application) => {
 		}),
 		'universal.findOne': findOneControllerFactory({ db, services }),
 		'universal.search': searchControllerFactory({ Application, db, services }),
+		'universal.getLast': getLastControllerFactory({ db, services }),
 	};
 };
 
