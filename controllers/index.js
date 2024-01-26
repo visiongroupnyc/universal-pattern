@@ -27,17 +27,20 @@ const controllers = (Application) => {
 	});
 
 	const lookupProcess = async (params, lookup) => {
+		debug('lookupProcess called');
 		const fields = lookup.populate.reduce((a, b) => ({ ...a, [b]: 1 }), {});
-		const data = await services.findOne(`/${lookup.collection}`, { _id: db.ObjectId(params[lookup.field]) }, fields);
+		if (params[lookup.field].length !== 24) throw new Error(`"${params[lookup.field]}" is not a ObjectId valid`);
+		const data = await services.findOne(`/${lookup.collection}`, { _id: params[lookup.field] }, { projection: fields });
 		if (!data) throw new Error(`Invalid value ${lookup.field}(${params[lookup.field]}) for ${lookup.collection}`);
 		params[lookup.collection] = data;
 		if (data._id) {
 			params[lookup.collection]._id = data._id.toString();
 		}
-		return Promise.resolve(data);
+		return data;
 	};
 
 	const uniqueProcess = async (params, unique) => {
+		debug('uniqueProcess called');
 		const collection = getModule(unique.apiPath);
 		const data = await services.findOne(`/${collection}`, { [unique.field]: params[unique.field] }, { _id: 1 });
 		if (data) {

@@ -5,7 +5,7 @@ const validString = (req, method, prop, meta) => {
 	let n;
 	const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 	const p = req[method][prop];
-	if (meta.required && !p) throw new Error(`required string: ${prop}`);
+	if (meta.required && !p) throw new Error(`Required string: ${prop}`);
 	if (meta.format === 'date') {
 		n = new Date(p);
 		if (n.toString() === 'Invalid Date') throw new Error(`Invalid date format: ${prop}`);

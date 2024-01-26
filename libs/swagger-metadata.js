@@ -17,7 +17,6 @@ const swaggerMetadata = (Application) => {
 		req.swagger = {
 			params: {},
 			apiPath: url,
-			tenant: req?.headers?.tenant,
 		};
 
 		if (swagger.paths[url] && swagger.paths[url][method]) {
@@ -57,7 +56,7 @@ const swaggerMetadata = (Application) => {
 				}
 				return next();
 			} catch (error) {
-				debug('invalid request: ', req.url, req.swagger, error);
+				debug('Invalid request: ', req.url, req.swagger, error);
 				return res.status(500).end(`${error}`);
 			}
 		}

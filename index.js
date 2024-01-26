@@ -127,7 +127,7 @@ async function universalPattern(options = {}) {
 	UP.addHook = addHook(UP);
 	UP.registerController = registerController(UP);
 	server.listen(defaultOptions.port);
-	console.info(`ready on *:${defaultOptions.port}`);
+	debug(`ready on *:${defaultOptions.port}`);
 	return UP;
 }
 
