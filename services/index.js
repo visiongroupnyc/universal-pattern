@@ -3,6 +3,7 @@ const searchFactory = require('./search');
 const findOneFactory = require('./findone');
 const insertFactory = require('./insert');
 const insertOrCountFactory = require('./insertorcount');
+const removeFactory = require('./remove');
 
 const services = (Application) => {
 	const { db, getModule } = Application;
@@ -58,11 +59,7 @@ const services = (Application) => {
 		insert: insertFactory({ db, getModule }),
 		findOne: findOneFactory({ db, getModule }),
 		insertOrCount: insertOrCountFactory({ db, getModule }),
-		remove: async (endpoint, _id, opts = {}) => {
-			const collection = getModule(endpoint);
-			const removed = await db[collection].asyncRemove({ _id: db.ObjectId(_id) }, opts);
-			return removed;
-		},
+		remove: removeFactory({ db, getModule }),
 
 		removeAll: async (endpoint, query = { a: 1 }, opts = {}) => {
 			const collection = getModule(endpoint);
