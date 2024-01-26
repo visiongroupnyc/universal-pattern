@@ -22,7 +22,9 @@ const swaggerMetadata = (Application) => {
 		if (swagger.paths[url] && swagger.paths[url][method]) {
 			try {
 				const data = getParameters(swagger, url, method);
-				req.swagger.params = validateParameters(req, data, req.swagger.params);
+				validateParameters(req, data, req.swagger.params);
+
+				req.swagger.definition = swagger.paths[url][method];
 				const keys = Object.keys(req.body);
 				if (keys.length > 0) {
 					keys.forEach((k) => {
@@ -36,6 +38,7 @@ const swaggerMetadata = (Application) => {
 					debug('mws: with schema');
 					req.swagger.params.modeldata['x-swagger-unique'] = [];
 					req.swagger.params.modeldata['x-swagger-lookup'] = [];
+
 					if (data.modeldata.schema['x-swagger-model-version']) {
 						req.swagger.params['x-swagger-model-version'] = data.modeldata.schema['x-swagger-model-version'];
 					} else {
@@ -48,6 +51,7 @@ const swaggerMetadata = (Application) => {
 							if (item['x-swagger-lookup']) {
 								req.swagger.params.modeldata['x-swagger-lookup'].push({ ...item['x-swagger-lookup'], field: key });
 							}
+
 							if (item['x-swagger-unique']) {
 								req.swagger.params.modeldata['x-swagger-unique'].push({ ...item['x-swagger-unique'], field: key, item });
 							}

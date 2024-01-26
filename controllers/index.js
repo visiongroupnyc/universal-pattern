@@ -34,6 +34,7 @@ const controllers = (Application) => {
 	const lookupProcess = async (params, lookup) => {
 		debug('lookupProcess called');
 		const fields = lookup.populate.reduce((a, b) => ({ ...a, [b]: 1 }), {});
+		if (!params[lookup.field]) throw new Error(`${lookup.field} is required`);
 		if (params[lookup.field].length !== 24) throw new Error(`"${params[lookup.field]}" is not a ObjectId valid`);
 		const data = await services.findOne(`/${lookup.collection}`, { _id: params[lookup.field] }, { projection: fields });
 		if (!data) throw new Error(`Invalid value ${lookup.field}(${params[lookup.field]}) for ${lookup.collection}`);
@@ -47,7 +48,9 @@ const controllers = (Application) => {
 	const uniqueProcess = async (params, unique) => {
 		debug('uniqueProcess called');
 		const collection = getModule(unique.apiPath);
-		const data = await services.findOne(`/${collection}`, { [unique.field]: params[unique.field] }, { _id: 1 });
+		const data = await services.findOne(`/${collection}`, { [unique.field]: params[unique.field] }, {
+			projection: { _id: 1 },
+		});
 		if (data) {
 			await db[collection].updateOne({ _id: new ObjectId(String(data._id)) }, { $inc: { _retry: 1 } });
 			throw new Error(`Duplicate value for ${unique.field} field, should be unique`);

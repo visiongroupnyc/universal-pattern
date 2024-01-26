@@ -14,6 +14,8 @@ function insertControllerFactory({
 		let params = req.swagger.params.modeldata.value;
 
 		try {
+			console.info('req.swagger.params.modeldata: ', req.swagger.definition);
+
 			if (req.swagger.params.modeldata && req.swagger.params.modeldata['x-swagger-unique'] && req.swagger.params.modeldata['x-swagger-unique'].length > 0) {
 				await Promise.all(
 					req.swagger.params.modeldata['x-swagger-unique']

@@ -7,18 +7,22 @@ const validBoolean = require('./booleans');
 const validArray = require('./arrays');
 
 const validateParameters = (req, params, level = {}) => {
-	debug('validateParameters called');
+	debug('validateParameters called: ', level);
 	Object.entries(params)
 		.forEach(([k, v]) => {
-			debug('validating: ', k, v);
+			debug('validating: ', k, v, level);
 			try {
 				let method = v.in === 'header' ? 'headers' : v.in || 'body';
 				if (v.schema) {
 					method = 'body';
 				}
 				if (v.schema && v.schema.type === 'object') {
-					level[k] = { value: {} };
-					return validateParameters(req, v.schema.properties, level[k].value);
+					level[k] = {
+						value: {
+							...validateParameters(req, v.schema.properties, {}),
+						},
+					};
+					return level;
 				}
 
 				if (v.type === 'number' || v.type === 'integer') {
@@ -58,6 +62,7 @@ const validateParameters = (req, params, level = {}) => {
 					return level;
 				}
 
+				console.info('no se hacer: ', level);
 				level = { ...level, [k]: req[method][k] };
 				return level;
 			} catch (err) {

@@ -4,10 +4,10 @@
 
 ```yaml
 x-swagger-fire:
-	collection: stats
-	count:
-		query: "{ brandId: $_id}"
-	field:
-		totalbrands
+	from: feed
+	where: "{ carId:$carId, algo: {$gt: 1123 } }"
+	action: count
+	to: cars
 
 ```
+

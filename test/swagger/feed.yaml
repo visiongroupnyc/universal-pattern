@@ -35,7 +35,7 @@ paths:
             $ref: '#/definitions/feeditem'
     put:
       tags:
-        - cars
+        - feed
       summary: insert new entry into feed
       x-swagger-router-controller: universal.insert
       parameters:
@@ -43,12 +43,22 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/carInput'
+            $ref: '#/definitions/feedInput'
       responses:
         '200':
           description: car added
           schema:
             $ref: '#/definitions/car'
+      x-swagger-fire:
+        - from:
+          where: "{ carId:$carId }"
+          action: inc
+          value: 1
+          to: cars.totalFeed
+        - from: feed
+          where: "{ carId:$carId, algo: {$gt: 1123 } }"
+          action: count
+          to: cars
 
   /feed/byid:
     get:
@@ -77,6 +87,40 @@ paths:
             $ref: '#/definitions/feeditem'
 
 definitions:
+  feedInput:
+    type: object
+    properties:
+      body:
+        type: string
+        required: true
+        minLength: 4
+      rate:
+        type: integer
+        required: true
+        max: 5
+        min: 1
+        decimals: 0
+      userId:
+        type: string
+        format: mongoId
+        x-swagger-lookup:
+          collection: users
+          populate:
+            - _id
+            - firstname
+            - lastname
+            - avatar
+      carId:
+        type: string
+        format: mongoId
+        x-swagger-lookup:
+          collection: cars
+          populate:
+            - _id
+            - name
+            - color
+            - brands.name
+
   feeditem:
     type: object
     properties:
