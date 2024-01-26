@@ -5,6 +5,7 @@ const insertFactory = require('./insert');
 const insertOrCountFactory = require('./insertorcount');
 const removeFactory = require('./remove');
 const updateFactory = require('./update');
+const getLastFactory = require('./getlast');
 
 
 const services = (Application) => {
@@ -61,12 +62,17 @@ const services = (Application) => {
 		insert: insertFactory({ db, getModule }),
 		findOne: findOneFactory({ db, getModule }),
 		insertOrCount: insertOrCountFactory({ db, getModule }),
+		getLast: getLastFactory({db, getModule}),
 		remove: removeFactory({ db, getModule }),
 
 		removeAll: async (endpoint, query = { a: 1 }, opts = {}) => {
 			const collection = getModule(endpoint);
 			return db[collection].asyncRemove(query, opts);
 		},
+		update: updateFactory({
+			getModule,
+			db,
+		}),
 		update: updateFactory({
 			getModule,
 			db,
@@ -88,18 +94,6 @@ const services = (Application) => {
 			const collection = getModule(endpoint);
 			const total = await db[collection].asyncCount(query, opts);
 			return total;
-		},
-
-		getLast: async (endpoint, query = {}, fields = {}) => {
-			const collection = getModule(endpoint);
-			debug('.getLast: ', collection, query, fields);
-			return new Promise((resolve, reject) => {
-				db[collection].find(query, fields)
-					.sort({ _id: 1 }, (err, doc) => {
-						if (err) return reject(err);
-						return resolve(doc.length > 0 ? doc.pop() : null);
-					});
-			});
 		},
 
 		find: async (endpoint, query = {}, fields = {}, opts = {}) => {
