@@ -22,3 +22,8 @@ El resultado se retornará con la siguiente estructura
 ## el Argumento `q`
 
 - _id: indica que queremos el documento  con el `_id` indicado.
+
+
+
+## startAt and endAt
+Automatic this props will converted into Date ISO Object.

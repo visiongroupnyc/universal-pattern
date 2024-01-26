@@ -14,7 +14,7 @@ paths:
 
       responses:
         '200':
-          description: reports
+          description: return all brand from database
           schema:
             $ref: '#/definitions/brand'
     put:
@@ -40,10 +40,7 @@ paths:
       summary: delete brand
       x-swagger-router-controller: universal.remove
       parameters:
-        - name: _id
-          in: query
-          required: true
-          type: string
+        - $ref: '#/parameters/by_id'
       responses:
         '200':
           description: deleted brand

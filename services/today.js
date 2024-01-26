@@ -6,7 +6,7 @@ function todayFactory({
 	db,
 }) {
 	debug('Factory called');
-	return async (endpoint, opts = { limit: 10000, sort: '_id:desc' }) => {
+	return async (endpoint, opts = { limit: 10000, sort: '_id:-1' }) => {
 		debug('Called');
 
 		const collection = getModule(endpoint.replace('/today', ''));

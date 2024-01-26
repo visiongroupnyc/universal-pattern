@@ -1,4 +1,4 @@
-# Universal Pattern Microservice Example.
+# Universal Pattern Microservice Example
 
 Se propone desarrollar una red social de fanáticos de autos.
 El sistema permitirá buscar autos (por marca), y que cada usuario pueda hacer una review de los mismos.
@@ -6,6 +6,21 @@ Esa review quedará en el feed del usuario.
 
 Los usuarios de la red social podrán dejar comentarios sobre las reviews realizadas, como así tambien like.
 
+# Como ejecutar el test?
+
+Antes de ejecutar el ejemplo dentro del directorio `test` es necesario contar con Node.js v20 o superior y MongoDB 6 o superior.
+
+Si es necesario, puede editar el archivo `server.sh` para cambiar la configuración del acceso a la base de datos, puerto, etc.
+
+```bash
+$ git clone https://github.com/visiongroupnyc/universal-pattern.git
+$ cd universal-pattern
+$ npm install
+$ cd test
+$ ./server.sh
+```
+
+# Modulos definidos
 
 ## Users
 
@@ -39,7 +54,3 @@ Cada usuario tiene un feed con toda su activdad.
 
 ## Ratings
 
-# Running
-```bash
-DEBUG=up* ./server.sh
-```
