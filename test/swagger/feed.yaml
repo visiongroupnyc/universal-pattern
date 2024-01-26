@@ -33,6 +33,22 @@ paths:
           description: deleted user
           schema:
             $ref: '#/definitions/feeditem'
+    put:
+      tags:
+        - cars
+      summary: insert new entry into feed
+      x-swagger-router-controller: universal.insert
+      parameters:
+        - name: modeldata
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/carInput'
+      responses:
+        '200':
+          description: car added
+          schema:
+            $ref: '#/definitions/car'
 
   /feed/byid:
     get:
