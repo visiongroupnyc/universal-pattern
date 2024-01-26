@@ -7,6 +7,10 @@ const removeFactory = require('./remove');
 const updateFactory = require('./update');
 const getLastFactory = require('./getlast');
 const todayFactory = require('./today');
+const countFactory = require('./count');
+const updateByFilterFactory = require('./updatebyfilter');
+const removeAllFactory = require('./removeall');
+const findFactory = require('./find');
 
 const services = (Application) => {
 	const { db, getModule } = Application;
@@ -37,46 +41,55 @@ const services = (Application) => {
 	}
 
 	return {
-		search: searchFactory({ getModule, db }),
-		today: todayFactory({ getModule, db }),
-		insert: insertFactory({ db, getModule }),
-		findOne: findOneFactory({ db, getModule }),
-		insertOrCount: insertOrCountFactory({ db, getModule }),
-		getLast: getLastFactory({ db, getModule }),
-		remove: removeFactory({ db, getModule }),
-		removeAll: async (endpoint, query = { a: 1 }, opts = {}) => {
-			const collection = getModule(endpoint);
-			return db[collection].asyncRemove(query, opts);
-		},
+		search: searchFactory({
+			getModule,
+			db,
+		}),
+		today: todayFactory({
+			getModule,
+			db,
+		}),
+		insert: insertFactory({
+			db,
+			getModule,
+		}),
+		findOne: findOneFactory({
+			db,
+			getModule,
+		}),
+		insertOrCount: insertOrCountFactory({
+			db,
+			getModule,
+		}),
+		getLast: getLastFactory({
+			db,
+			getModule,
+		}),
+		remove: removeFactory({
+			db,
+			getModule,
+		}),
+		removeAll: removeAllFactory({
+			getModule,
+			db,
+		}),
 		update: updateFactory({
 			getModule,
 			db,
 		}),
-		updateByFilter: async (endpoint, query = {}, data, options = { updated: true, set: true }, opts = {}) => {
-			debug('updateByFilter called: ', endpoint, query, data, options, opts);
-			let rData = data;
-			const collection = getModule(endpoint);
-			if (options.updated) data.updated = new Date();
-			if (options.set) rData = { $set: data };
+		updateByFilter: updateByFilterFactory({
+			getModule,
+			db,
+		}),
+		count: countFactory({
+			getModule,
+			db,
+		}),
 
-			const updated = await db[collection].asyncUpdate(query, rData, { ...opts, multi: true });
-			return updated;
-		},
-
-		count: async (endpoint, query, opts = {}) => {
-			debug('count called');
-			const collection = getModule(endpoint);
-			const total = await db[collection].asyncCount(query, opts);
-			return total;
-		},
-
-		find: async (endpoint, query = {}, fields = {}, opts = {}) => {
-			const collection = getModule(endpoint);
-			debug('.find called: ', collection, query);
-			const data = await db[collection].asyncFind(query, fields, opts);
-			return data;
-		},
-
+		find: findFactory({
+			getModule,
+			db,
+		}),
 		distinct: async (endpoint, field = '_id', query = {}) => {
 			const collection = getModule(endpoint);
 			debug('.distinct called: ', collection, field, query);

@@ -9,6 +9,7 @@ const removeControllerFactory = require('./remove');
 const updateControllerFactory = require('./update');
 const todayControllerFactory = require('./today');
 const getLastControllerFactory = require('./getlast');
+const countFactory = require('./count');
 
 const controllers = (Application) => {
 	debug('Called');
@@ -18,6 +19,9 @@ const controllers = (Application) => {
 		getModule,
 	} = Application;
 
+	if (!db) {
+		throw new Error('Cant access to universal.* without MongoDB Connection');
+	}
 	const injectDefaultModel = (model, req) => ({
 		...model,
 		_v: parseInt(req.swagger.params['x-swagger-model-version'], 10),
@@ -87,6 +91,7 @@ const controllers = (Application) => {
 		'universal.findOne': findOneControllerFactory({ db, services }),
 		'universal.search': searchControllerFactory({ Application, db, services }),
 		'universal.getLast': getLastControllerFactory({ db, services }),
+		'universal.count': countFactory({ services, db }),
 	};
 };
 

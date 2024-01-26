@@ -49,6 +49,17 @@ paths:
           schema:
             $ref: '#/definitions/feeditem'
 
+  /feed/count:
+    get:
+      tags:
+        - feed
+      summary: return total items feed
+      x-swagger-router-controller: universal.count
+      responses:
+        '200':
+          description: feed by id
+          schema:
+            $ref: '#/definitions/feeditem'
 
 definitions:
   feeditem:
