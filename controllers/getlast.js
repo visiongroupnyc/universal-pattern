@@ -11,9 +11,8 @@ function findOneControllerFactory({
 			throw new Error('Cant access to universal.* without MongoDB Connection');
 		}
 
-		const { _id } = req.query;
 		try {
-			const result = await services.getLast(req.swagger.apiPath, { _id });
+			const result = await services.getLast(req.swagger.apiPath);
 			return res.json(result);
 		} catch (err) {
 			return next(err);

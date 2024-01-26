@@ -5,15 +5,14 @@ function getLastFactory({
 	db,
 }) {
 	debug('Factory called');
-	return async (endpoint, query = {}, fields = {}) => {
+	return async (endpoint) => {
 		debug('Called');
 		const collection = getModule(endpoint);
-		const result = await db[collection].find(query, fields)
-			.sort({ _id: 1 })
-			.limit(1)
-			.toArray();
+		const result = await db[collection].findOne({}, {
+			sort: { _id: -1 },
+		});
 
-		return result.length > 0 ? result[0] : null;
+		return result;
 	};
 }
 

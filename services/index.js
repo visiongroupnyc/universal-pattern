@@ -6,7 +6,7 @@ const insertOrCountFactory = require('./insertorcount');
 const removeFactory = require('./remove');
 const updateFactory = require('./update');
 const getLastFactory = require('./getlast');
-
+const todayFactory = require('./today');
 
 const services = (Application) => {
 	const { db, getModule } = Application;
@@ -38,33 +38,12 @@ const services = (Application) => {
 
 	return {
 		search: searchFactory({ getModule, db }),
-		today: async (endpoint) => {
-			debug('.today called: ');
-
-			return new Promise((resolve, reject) => {
-				const collection = getModule(endpoint.replace('/today', ''));
-				const p = {
-					limit: 500,
-					page: 1,
-					sorting: '_id:desc',
-				};
-
-				const today = new Date();
-				today.setHours(0, 0, 0);
-				const tomorow = new Date(this.moment(today).add(1, 'days'));
-
-				db[collection].paginate({ $and: [{ added: { $gte: today } }, { added: { $lte: tomorow } }] }, {}, p)
-					.then(resolve)
-					.catch(reject);
-			});// end promise
-		},
-
+		today: todayFactory({ getModule, db }),
 		insert: insertFactory({ db, getModule }),
 		findOne: findOneFactory({ db, getModule }),
 		insertOrCount: insertOrCountFactory({ db, getModule }),
-		getLast: getLastFactory({db, getModule}),
+		getLast: getLastFactory({ db, getModule }),
 		remove: removeFactory({ db, getModule }),
-
 		removeAll: async (endpoint, query = { a: 1 }, opts = {}) => {
 			const collection = getModule(endpoint);
 			return db[collection].asyncRemove(query, opts);
@@ -73,11 +52,6 @@ const services = (Application) => {
 			getModule,
 			db,
 		}),
-		update: updateFactory({
-			getModule,
-			db,
-		}),
-
 		updateByFilter: async (endpoint, query = {}, data, options = { updated: true, set: true }, opts = {}) => {
 			debug('updateByFilter called: ', endpoint, query, data, options, opts);
 			let rData = data;
