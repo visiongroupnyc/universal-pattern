@@ -59,12 +59,19 @@ parameters:
     type: string
     description: apikey access
     required: true
+  field:
+    name: field
+    in: query
+    type: string
+    default: ''
+    description: field prop
   fields:
     name: fields
     in: query
     type: string
     default: ''
     description: populate fields
+
   coordinates:
     name: coordinates
     in: query

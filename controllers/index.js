@@ -9,7 +9,8 @@ const removeControllerFactory = require('./remove');
 const updateControllerFactory = require('./update');
 const todayControllerFactory = require('./today');
 const getLastControllerFactory = require('./getlast');
-const countFactory = require('./count');
+const countControllerFactory = require('./count');
+const distinctControllerFactory = require('./distinct');
 
 const controllers = (Application) => {
 	debug('Called');
@@ -88,10 +89,25 @@ const controllers = (Application) => {
 			db,
 			services,
 		}),
-		'universal.findOne': findOneControllerFactory({ db, services }),
-		'universal.search': searchControllerFactory({ Application, db, services }),
-		'universal.getLast': getLastControllerFactory({ db, services }),
-		'universal.count': countFactory({ services, db }),
+		'universal.findOne': findOneControllerFactory({
+			services,
+		}),
+		'universal.search': searchControllerFactory({
+			Application,
+			db,
+			services,
+		}),
+		'universal.getLast': getLastControllerFactory({
+			db,
+			services,
+		}),
+		'universal.count': countControllerFactory({
+			services,
+			db,
+		}),
+		'universal.distinct': distinctControllerFactory({
+			services,
+		}),
 	};
 };
 

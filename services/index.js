@@ -11,6 +11,7 @@ const countFactory = require('./count');
 const updateByFilterFactory = require('./updatebyfilter');
 const removeAllFactory = require('./removeall');
 const findFactory = require('./find');
+const distinctFactory = require('./distinct');
 
 const services = (Application) => {
 	const { db, getModule } = Application;
@@ -90,16 +91,10 @@ const services = (Application) => {
 			getModule,
 			db,
 		}),
-		distinct: async (endpoint, field = '_id', query = {}) => {
-			const collection = getModule(endpoint);
-			debug('.distinct called: ', collection, field, query);
-			return new Promise((resolve, reject) => {
-				db[collection].distinct(field, query, (err, docs) => {
-					if (err) return reject(err);
-					return resolve(docs);
-				});
-			});
-		},
+		distinct: distinctFactory({
+			getModule,
+			db,
+		}),
 		modify: async (collection, _id, query) => {
 			debug('.modify called:', query);
 			return new Promise((resolve, reject) => {

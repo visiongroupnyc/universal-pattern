@@ -42,7 +42,6 @@ paths:
       x-swagger-router-controller: universal.findOne
       parameters:
         - $ref: '#/parameters/by_id'
-
       responses:
         '200':
           description: feed by id
