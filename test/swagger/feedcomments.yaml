@@ -2,7 +2,7 @@ paths:
   /feedcomments:
     get:
       tags:
-        - feedcomments
+        - feed
       summary: feedcomments list
       x-swagger-router-controller: universal.search
       parameters:
@@ -20,7 +20,7 @@ paths:
 
     delete:
       tags:
-        - feedcomments
+        - feed
       summary: delete feedcomment
       x-swagger-router-controller: universal.remove
       parameters:
@@ -36,7 +36,7 @@ paths:
 
     put:
       tags:
-        - feedcomments
+        - feed
       summary: insert new feedcomment
       x-swagger-router-controller: universal.insert
       parameters:
