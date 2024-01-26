@@ -40,3 +40,42 @@ Como vemos, la propiedad email tiene la propiedad `x-swagger-unique`, lo que le 
 
 En caso de que el key:value ya exista previamente, la propiedad `_retry` se incrementará en 1.
 Esta propiedad funcionará como registro testigo de las veces que se ha intentado insertar un nuevo documento que tenga previamente key:value declarados como unique.
+
+
+## x-swagger-lookup
+
+Cuando insertamos un nuevo document, a la hora de definir el schema de dato, podemos hacer uso de la propiedad `x-swagger-lookup`.
+
+Esta propiedad indica que se deberá buscar en la collection indicada el Id que se pasa como argumento, y si solo si existe, se procede con la inserción del documento.
+Podemos indicar que propiedades queremos popular de la collection a la cual le hacemos lookup.
+
+En el siguiente ejemplo, para insertar un nuevo documento en la collection `cars`, debemos usar la prop `brandId`, la cual es un lookup hacia la collection brands.
+Si el brandId existe dentro de la collection `brands`, se popularán las propiedades `_id` y `name`.
+
+
+```yaml
+definitions:
+  carInput:
+    type: object
+    properties:
+      name:
+        type: string
+      color:
+        type: string
+        enum:
+          - black
+          - white
+          - blue
+          - green
+          - gray
+          - yellow
+        required: true
+      brandId:
+        type: string
+        format: mongoId
+        x-swagger-lookup:
+          collection: brands
+          populate:
+            - _id
+            - name
+```

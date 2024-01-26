@@ -22,6 +22,13 @@ Se deberá tener las marcas de los autos en una collection.
 
 
 ## Cars
+Es el módulo que trabaja con los autos en si.
+Para insert un nuevo `car` debemos tener en consideración:
+
+- Los colores disponibles están en un enum, por lo cual si pasamo un color que no esté en la lista, UP retornará un error.
+- El `brandId` debe ser un id válido de MongoDB, y existir en la collection `brand`
+
+
 
 ## Feed
 Cada usuario tiene un feed con toda su activdad.
