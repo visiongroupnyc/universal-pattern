@@ -11,7 +11,6 @@ paths:
         - $ref: '#/parameters/sorting'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/fields'
-        - $ref: '#/parameters/tenant'
 
       responses:
         '200':
@@ -22,9 +21,8 @@ paths:
       tags:
         - users
       summary: insert new user
-      x-swagger-router-controller: universal.insert
+      x-swagger-router-controller: universal.insertOrCount
       parameters:
-        - $ref: '#/parameters/tenant'
         - name: modeldata
           in: body
           required: true
@@ -58,7 +56,6 @@ paths:
       summary: for updated car document
       x-swagger-router-controller: universal.update
       parameters:
-        - $ref: '#/parameters/tenant'
         - name: modeldata
           in: body
           required: true

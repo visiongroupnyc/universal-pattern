@@ -34,6 +34,22 @@ paths:
           schema:
             $ref: '#/definitions/feeditem'
 
+  /feed/byid:
+    get:
+      tags:
+        - feed
+      summary: feed list
+      x-swagger-router-controller: universal.findOne
+      parameters:
+        - $ref: '#/parameters/by_id'
+
+      responses:
+        '200':
+          description: feed by id
+          schema:
+            $ref: '#/definitions/feeditem'
+
+
 definitions:
   feeditem:
     type: object

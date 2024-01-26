@@ -1,25 +1,13 @@
-const env = require('dotenv');
-const http = require('http');
-const express = require('express');
-const path = require('path');
+const path = require('node:path');
 
 const up = require('../index');
 
-const app = express();
-const server = http.createServer(app);
-
-env.config();
-const port = process.env.PORT;
-const connection = process.env.CONNECTION;
-const dbname = process.env.DBNAME;
-const basepath = process.env.BASEPATH;
-const hostname = process.env.HOSTNAME;
-
+const swaggerFolder = path.join(process.cwd(), 'swagger');
 const params = {
 	swagger: {
-		baseDoc: basepath,
-		host: `${hostname}:${port}`,
-		folder: path.join(process.cwd(), 'swagger'),
+		baseDoc: process.env.BASEPATH,
+		host: `${process.env.HOST}:${process.env.PORT}`,
+		folder: swaggerFolder,
 		info: {
 			version: 2.0,
 			title: 'Universal Pattern Example',
@@ -35,17 +23,22 @@ const params = {
 	},
 	compress: true,
 	cors: true,
-	production: process.env.NODE_ENV === 'production',
+	production: false,
 	routeController: (req, res, next) => next(),
+	port: process.env.PORT,
+	database: {
+		uri: process.env.CONNECTION,
+		name: process.env.DBNAME,
+	},
 };
 
-if (connection) {
-	params.database = {
-		uri: connection,
-		name: dbname,
-	};
+async function init() {
+	try {
+		const upInstance = await up(params);
+		console.info(`UP InstanceId: ${upInstance.instanceId}`);
+	} catch (err) {
+		console.error('Error initializing ', err);
+	}
 }
 
-up(app, params)
-	.then(() => server.listen(port, () => console.info(`listen *:${port}`)))
-	.catch((err) => console.error('Error initializing ', err));
+init();

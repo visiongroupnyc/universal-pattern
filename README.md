@@ -55,7 +55,7 @@ El comando npm init nos hará una seríe de preguntas.
 - version: presionamos enter.
 - description: podemos indicar o no una descripción, es opcional.
 - entry point: aquí ingresaremos "app.js"
-- test command: aquí ingresaremos "mocha".
+- test command: aquí ingresaremos "node".
 - git repository: nos está preguntando cual será el path o url de nuestro repositorio de git. Presionamos enter.
 - keywords: presionamos enter
 - author: ingresamos nuestro nombre
@@ -181,15 +181,8 @@ definitions:
 # Creamos app.js
 
 ```javascript
-const http = require('http');
-const express = require('express');
-const path = require('path');
-const config = require('config');
 const up = require('universal-pattern');
 
-const port = config.get('port');
-const app = express();
-const server = http.createServer(app);
 
 up(app, {
   swagger: {
@@ -511,87 +504,12 @@ Search documents without pagination system.
 
 ---
 
-# Hooks
 
-```javascript
-// Insert hooks
-upInstance.addHook('/endpoint', 'beforeInsert', async (req, dataDocument, UPInstance) => {
-  return Promise.resolve(params);
-});
-
-upInstance.addHook('/endpoint', 'afterInsert', async (req, insertedDocument, UPInstance) => {
-  return Promise.resolve(params);
-});
-
-// Update hooks
-upInstance.addHook('/endpoint', 'beforeUpdate', async (req, dataDocument, UPInstance) => {
-  return Promise.resolve(params);
-});
-
-upInstance.addHook('/endpoint', 'afterUpdate', async (req, updatedDocument, UPInstance) => {
-  return Promise.resolve(params);
-});
-
-// Remove hooks
-upInstance.addHook('/endpoint', 'beforeRemove', async (req, documentId, UPInstance) => {
-  return Promise.resolve(params);
-});
-
-upInstance.addHook('/endpoint', 'afterRemove', async (req, removedDocument, UPInstance) => {
-  return Promise.resolve(params);
-});
-
-
-// Search hooks
-upInstance.addHook('/endpoint', 'beforeSearch', async (req, searchParams, UPInstance) => {
-  return Promise.resolve(params);
-});
-
-upInstance.addHook('/endpoint', 'afterSearch', async (req, searchResults, UPInstance) => {
-  return Promise.resolve(params);
-});
-
-// global Hooks
-upInstance.addHook('*', 'beforeSearch', async (req, searchParams, UPInstance) => {
-  return Promise.resolve(params);
-});
-upInstance.addHook('*', 'afterSearch', async (req, searchResults, UPInstance) => {
-  return Promise.resolve(params);
-});
-
-upInstance.addHook('*', 'beforeInsert', async (req, dataDocument, UPInstance) => {
-  return Promise.resolve(params);
-});
-
-upInstance.addHook('*', 'afterInsert', async (req, insertedDocument, UPInstance) => {
-  return Promise.resolve(params);
-});
-
-// Update hooks
-upInstance.addHook('*', 'beforeUpdate', async (req, dataDocument, UPInstance) => {
-  return Promise.resolve(params);
-});
-
-upInstance.addHook('*', 'afterUpdate', async (req, updatedDocument, UPInstance) => {
-  return Promise.resolve(params);
-});
-
-// Remove hooks
-upInstance.addHook('*', 'beforeRemove', async (req, documentId, UPInstance) => {
-  return Promise.resolve(params);
-});
-
-upInstance.addHook('*', 'afterRemove', async (req, removedDocument, UPInstance) => {
-  return Promise.resolve(params);
-});
-
-
-```
 
 ---
 # Register controllers
 ```javascript
-upInstance.registerController('module.methodControllerName', (req, res, next) => {
+upInstance.registerController('module.methodControllerName', async (req, res, next) => {
   console.info(req.swagger);
   res.json({ ok: true });
 });

@@ -1,4 +1,4 @@
-const debug = require('debug')('universal-pattern:libs:swagger-router');
+const debug = require('debug')('up:libs:swagger-router');
 
 const swaggerRouter = (Application) => {
 	const { app, controllers, swagger } = Application;
@@ -21,25 +21,24 @@ const swaggerRouter = (Application) => {
 					const basePath = swagger.basePath.replace('http://', '').replace('https://', '');
 					const finalpath = `${basePath}${path}`;
 
-					debug('registering: ', method, finalpath, props['x-swagger-router-controller']);
-					app[method](finalpath, swaggerRouterManager(props), (req, res, next) => {
-						debug('request: ', req.method, req.url, req.query);
-						handler()(req, res, (err) => {
-							if (err) {
-								debug('Controller catch Error: ', err);
-								res.status(503).json({
-									code: 'controller_error_catched',
-									message: err.toString(),
-									success: false,
-								}).end();
-							} else {
-								next();
-							}
-						})
-							.catch((err) => {
-								console.info('Error duro: ', err);
-								res.status(500).end(err.toString());
+					debug('Adding controller: ', finalpath, controllers[props['x-swagger-router-controller']]);
+					app[method](finalpath, swaggerRouterManager(props), async (req, res, next) => {
+						try {
+							handler()(req, res, (err) => {
+								if (err) {
+									debug('Controller catch Error: ', err);
+									return res.status(503).json({
+										code: 'controller_error_catched',
+										message: err.toString(),
+										success: false,
+									}).end();
+								}
+								return next();
 							});
+						} catch (err) {
+							console.info('Internal Error: ', err);
+							res.status(500).end(err.toString());
+						}
 					});
 				});
 		});
