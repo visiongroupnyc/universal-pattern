@@ -62,7 +62,6 @@ const validateParameters = (req, params, level = {}) => {
 					return level;
 				}
 
-				console.info('no se hacer: ', level);
 				level = { ...level, [k]: req[method][k] };
 				return level;
 			} catch (err) {
