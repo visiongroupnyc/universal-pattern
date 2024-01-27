@@ -1,5 +1,5 @@
 # Universal Pattern 💻
-![Universal pattern](docs/assets/universal-pattern.png)
+![Universal pattern](docs/assets/universal-pattern-features.png)
 
 Universal Pattern es una librería que permite de una forma muy simple crear microservicios y endpoint utilizando [Node.js](https://nodejs.org), [Swagger](https://editor.swagger.io) y [MongoDB](https://www.mongodb.com/).
 
