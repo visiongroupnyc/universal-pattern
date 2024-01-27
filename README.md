@@ -1,4 +1,6 @@
 # Universal Pattern 💻
+![Universal pattern](docs/assets/universal-pattern.png)
+
 Universal Pattern es una librería que permite de una forma muy simple crear microservicios y endpoint utilizando [Node.js](https://nodejs.org), [Swagger](https://editor.swagger.io) y [MongoDB](https://www.mongodb.com/).
 
 El concepto principal es crear archivos `yaml` que denerán estar alojados en el directorio `swagger`.
@@ -51,6 +53,7 @@ paths:
 
 La herramienta integra de manera nativa la documentación y las pruebas de endpoints a través de Swagger. Esto significa que los desarrolladores pueden generar y actualizar la documentación de su API de forma automática, así como probar los endpoints directamente desde la interfaz de Swagger. Esta integración elimina la necesidad de herramientas o procesos adicionales para la documentación y prueba de APIs, lo que simplifica considerablemente el mantenimiento y la gestión de la API.
 
+![Universal pattern](docs/assets/swagger-ui.png)
 
 ### Automatización de Validaciones y Control de Parámetros
 
