@@ -10,7 +10,8 @@ Podemos definir que tipo de datos de entrada necesitamos, y cual será el dato d
 
 Como ya se estará dando cuenta, el propócito de Universal Pattern es poder definir módulos y que los mismos funcionen, sin necesidad de programación adicional (es decir, no tener que escribir el código de los módulos).
 
-📚 Características Destacadas:
+
+## 📚 Características Destacadas
 
 - Alta velocidad de desarrollo
 - Documentar es darle vida a los endpoints
@@ -18,14 +19,92 @@ Como ya se estará dando cuenta, el propócito de Universal Pattern es poder def
 - Swagger con esteroides!
 - Poder probar los endpoints en el mismo servicio! solo accediendo al directorio `/docs`
 
+
+### Definición Sencilla de Módulos y Endpoints
+
+Universal Pattern permite a los desarrolladores definir módulos y endpoints de manera sencilla y eficiente a través de archivos YAML. Esta característica reduce significativamente la complejidad y el tiempo necesario para configurar nuevos servicios y rutas. Al no requerir programación adicional para la creación de estos módulos, facilita enormemente el proceso de desarrollo, especialmente para aquellos que no son expertos en Node.js o MongoDB.
+
+```yaml
+paths:
+  /cars:
+    get:
+      tags:
+        - cars
+      summary: cars list
+      x-swagger-router-controller: universal.search
+      parameters:
+        - $ref: '#/parameters/q'
+        - $ref: '#/parameters/page'
+        - $ref: '#/parameters/sorting'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/fields'
+
+      responses:
+        '200':
+          description: cars list
+          schema:
+            $ref: '#/definitions/car'
+```
+
+
+### Integración Automatizada con Swagger para Documentación y Pruebas
+
+La herramienta integra de manera nativa la documentación y las pruebas de endpoints a través de Swagger. Esto significa que los desarrolladores pueden generar y actualizar la documentación de su API de forma automática, así como probar los endpoints directamente desde la interfaz de Swagger. Esta integración elimina la necesidad de herramientas o procesos adicionales para la documentación y prueba de APIs, lo que simplifica considerablemente el mantenimiento y la gestión de la API.
+
+
+### Automatización de Validaciones y Control de Parámetros
+
+Universal Pattern maneja automáticamente las validaciones y el control de parámetros para los endpoints definidos. Esto reduce la carga de tener que escribir y mantener código adicional para la validación de datos, asegurando que los datos entrantes cumplan con los requisitos especificados en los archivos YAML. Esta automatización ayuda a prevenir errores comunes y mejora la robustez de la aplicación sin esfuerzo adicional por parte del desarrollador.
+
+```yaml
+definitions:
+  feedInput:
+    type: object
+    properties:
+      body:
+        type: string
+        required: true
+        minLength: 4
+      rate:
+        type: integer
+        required: true
+        max: 5
+        min: 1
+        decimals: 0
+      userId:
+        type: string
+        format: mongoId
+        x-swagger-lookup:
+          collection: users
+          populate:
+            - _id
+            - firstname
+            - lastname
+            - avatar
+      carId:
+        type: string
+        format: mongoId
+        x-swagger-lookup:
+          collection: cars
+          populate:
+            - _id
+            - name
+            - color
+            - brands.name
+```
+
 Powered by [Cesar Casas](https://www.linkedin.com/in/cesarcasas)
 
-Funded by [Vision Group NYC](https://visiongroup.nyc)
+[Vision Group NYC](https://visiongroup.nyc)
 
-## Contenido
+# Contenido
 
 - [Universal Pattern 💻](#universal-pattern-)
-	- [Contenido](#contenido)
+	- [📚 Características Destacadas](#-características-destacadas)
+		- [Definición Sencilla de Módulos y Endpoints](#definición-sencilla-de-módulos-y-endpoints)
+		- [Integración Automatizada con Swagger para Documentación y Pruebas](#integración-automatizada-con-swagger-para-documentación-y-pruebas)
+		- [Automatización de Validaciones y Control de Parámetros](#automatización-de-validaciones-y-control-de-parámetros)
+- [Contenido](#contenido)
 	- [📋 Requerimientos](#-requerimientos)
 - [💻 Instalación](#-instalación)
 - [👨‍💼 Primer modulo](#-primer-modulo)
