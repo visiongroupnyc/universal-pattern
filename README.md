@@ -1,4 +1,4 @@
-# Universal Pattern
+# Universal Pattern 💻
 Universal Pattern es una librería que permite de una forma muy simple crear microservicios y endpoint utilizando [Node.js](https://nodejs.org), [Swagger](https://editor.swagger.io) y [MongoDB](https://www.mongodb.com/).
 
 El concepto principal es crear archivos `yaml` que denerán estar alojados en el directorio `swagger`.
@@ -10,7 +10,7 @@ Podemos definir que tipo de datos de entrada necesitamos, y cual será el dato d
 
 Como ya se estará dando cuenta, el propócito de Universal Pattern es poder definir módulos y que los mismos funcionen, sin necesidad de programación adicional (es decir, no tener que escribir el código de los módulos).
 
-Las ventajas principales son:
+📚 Características Destacadas:
 
 - Alta velocidad de desarrollo
 - Documentar es darle vida a los endpoints
@@ -24,15 +24,21 @@ Funded by [Vision Group NYC](https://visiongroup.nyc)
 
 ## Contenido
 
-- [Universal Pattern](#universal-pattern)
+- [Universal Pattern 💻](#universal-pattern-)
 	- [Contenido](#contenido)
 	- [📋 Requerimientos](#-requerimientos)
-- [Instalación](#instalación)
-- [Primer modulo](#primer-modulo)
+- [💻 Instalación](#-instalación)
+- [👨‍💼 Primer modulo](#-primer-modulo)
 	- [Crear directorios](#crear-directorios)
 	- [Creando module yaml](#creando-module-yaml)
 	- [Creamos app.js](#creamos-appjs)
 	- [Ejecutando!](#ejecutando)
+- [Preguntas frecuentes](#preguntas-frecuentes)
+	- [👨‍💻 Arquitectura y Flujo de Trabajo](#-arquitectura-y-flujo-de-trabajo)
+	- [👨‍💻 Personalización y Extensibilidad](#-personalización-y-extensibilidad)
+	- [🛡️ Seguridad y Autenticación](#️-seguridad-y-autenticación)
+	- [👨‍💻 Rendimiento y Escalabilidad](#-rendimiento-y-escalabilidad)
+	- [👨‍💻 Soporte y Comunidad](#-soporte-y-comunidad)
 - [Ejemplo](#ejemplo)
 - [License](#license)
 
@@ -42,7 +48,7 @@ Antes de comenzar a trabajar con Universal Pattern, debemos tener instalado prev
 - Node.js (version 20 o superior)
 - MongoDB
 
-# Instalación
+# 💻 Instalación
 Recomendamos utilizar Universal Pattern desde un entorno Linux, aunque funcionará sin problemas en entornos Windows y MacOS.
 
 ```bash
@@ -60,7 +66,7 @@ SuProyecto/
 	├ package.json
 ```
 
-# Primer modulo
+# 👨‍💼 Primer modulo
 🎉 Vamos a crear tu primer módulo con Universal Pattern.
 Primero que nada crearemos un proyecto nuevo utilizando npm (el manejador de paquetes de Node.js, deberán tenerlo instalado).
 Recuerde que es necesario tener instalado Node.js version 20 o superior y MongoDB version 6 o superior.
@@ -259,6 +265,123 @@ HOST=localhost PORT=5000 CONNECTION=mongodb://127.0.0.1:27017 DBNAME=uptesting B
 ```
 
 Abrimos nuestro navegador en la siguiente url (http://localhost:5000/services/docs) y veremos la documentación de nuestro nuevo módulo (y obviamente, podremos probarlo!)
+
+# Preguntas frecuentes
+
+## 👨‍💻 Arquitectura y Flujo de Trabajo
+```
+¿Podrías explicar un poco más sobre cómo Universal Pattern interactúa con Node.js, Swagger y MongoDB en un flujo de trabajo típico?.
+```
+
+Univiersal Pattern se ingregra a un proyecto Node.js como una librería, permitiendo leer un directorio `swagger` con los archivos yaml.
+Recordemos que el objetivo es que cada archivo `yaml` represente un `module`.
+
+Lo que hará Universal Patter es leer cada archivo yaml y registrar en Express (el cual gestiona internamente) las rutas, el control de parámetros de entrada a las mismas y todo aquel mecanismo que sea necesario.
+
+Universal Pattern entiende que cada módulo es una `collection` en la base de datos, por esa razón es importante entender que la ruta está directamente relacionada a la collection.
+
+Por ejemplo:
+`http://localhost:3000/services/users`
+
+En este caso debemos tener en cuenta:
+
+- `/services` es considerado el `basepath`, es decir, la ruta donde estará UP corriendo.
+- `/users` es el module, es decir, para Universal Pattern la collection en MongoDB se llamará `users`.
+
+
+## 👨‍💻 Personalización y Extensibilidad
+```
+¿Hay opciones para personalizar o extender la funcionalidad de los módulos generados por Universal Pattern? Por ejemplo, ¿cómo se manejarían casos en los que se necesiten lógicas de negocio específicas o integraciones con otros sistemas?
+```
+
+Universal Pattern ofrece controladores ya pre-definidos para ahorrar tiempo y esfuerzo.
+
+Cuando definimos un nuevo endpoint, debemos indicar por medio de la prop `x-swagger-router-controller` cual será el controlador (nombre del mismo).
+
+```yaml
+paths:
+  /brands:
+    get:
+      tags:
+        - brands
+      summary: brands list
+      x-swagger-router-controller: universal.search
+      parameters:
+        - $ref: '#/parameters/q'
+        - $ref: '#/parameters/page'
+        - $ref: '#/parameters/sorting'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/fields'
+
+      responses:
+        '200':
+          description: return all brand from database
+          schema:
+            $ref: '#/definitions/brand'
+```
+
+Universal pattern nos aporta controladores como:
+
+- universal.search: busca dentro de la collection, y retornará el resultado en forma paginado.
+- universal.insert: permitirá insertar información, agregando una capa de control de datos.
+- universal.update: actualiza un documento en la collection.
+- universal.remove: elimina un documento de la collection.
+- universal.count: cuenta los documentos de una collection.
+- universal.today: retorna todos los documentos del día actual.
+- universa.getLast: retorna el último documento de una collection.
+- universal.distinct: retorna todos los valores distintos de la field indicada.
+- universal.insertOrCount: intentará insertar un documento siempre y cuando el key/value indicado no exista previamente. En caso de que exista, retornará error, pero sumará en 1 la prop `_count`.
+
+Adicionalmente, Universal Pattern permite definir controladores propios, a fin de que podamos aplicar las reglas de negocio que necesitemos.
+
+
+```javascript
+upInstance.registerController('MyMoudleName.ControllerName', (req, res, next) => {
+  console.info(req.swagger);
+  res.json({ ok: true });
+});
+```
+
+Recomendamos crear los archivos de controladores propios dentro del directorio `controllers` a la misma altura que el directorio `swagger`.
+
+`upInstance` es la instancia de Universal Pattern una vez creada.
+
+```javascript
+async function init() {
+	try {
+		const upInstance = await up(params);
+		console.info(`UP InstanceId: ${upInstance.instanceId}`);
+	} catch (err) {
+		console.error('Error initializing ', err);
+	}
+}
+```
+
+## 🛡️ Seguridad y Autenticación
+```
+¿Universal Pattern ofrece características integradas para manejar la seguridad y autenticación en los endpoints, o esto debe ser implementado aparte?
+```
+
+Universal Pattern si bien no ofrece (de momento) mecanismos para seguridad, autentificación, etc. aporta una manera muy simple de lograrlo.
+
+Podemos crear un `mws` para decodificar un `jwt` y gracias a la propiedad `routeController` podemos aplicar reglas antes de que se llegue a los controladores definidos en los módulos.
+
+## 👨‍💻 Rendimiento y Escalabilidad
+```
+¿Hay alguna consideración especial en términos de rendimiento y escalabilidad cuando se utilizan microservicios generados con Universal Pattern, especialmente en aplicaciones de gran escala?
+```
+En este sentido, tenemos varios puntos a considerar.
+
+- MongoDB: podemos escalar la base de datos con todas las opciones disponibles de MongoDB (sharding, clustering, etc).
+- Múltiples instancias: con la ayuda de un `ELB` o cualquier otra opción de balance, podemos instalar nuestros servicios (grupo de módulos) en distintos servidores y balancear la carga.
+- Múltiples core: por default, Universal Patter ya reconoce el total de cores que tiene nuestro servidor y aprovechará cada uno de ellos.
+
+## 👨‍💻 Soporte y Comunidad
+```
+¿Cómo es el soporte y la comunidad alrededor de Universal Pattern? ¿Hay una base de usuarios activa o foros donde los desarrolladores pueden buscar ayuda y compartir mejores prácticas?
+```
+Contamos con una comunidad en [Telegram](https://t.me/universalpattern).
+Adicionalmente, pueden visitar el repositorio en [github](https://github.com/visiongroupnyc/universal-pattern/issues)
 
 
 # Ejemplo

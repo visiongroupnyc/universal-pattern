@@ -10,7 +10,6 @@ function insertOrCountFactory({
 		debug('Called');
 		try {
 			const collection = getModule(endpoint);
-			debug('called: ', endpoint);
 			const q = {};
 			q[params._criterial] = params[params._criterial];
 			delete params._criterial;
