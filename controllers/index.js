@@ -65,6 +65,7 @@ const controllers = (Application) => {
 			Application,
 			uniqueProcess,
 			injectDefaultModel,
+			db,
 		}),
 
 		'universal.insertOrCount': insertOrCountControllerFactory({
@@ -77,11 +78,13 @@ const controllers = (Application) => {
 		'universal.update': updateControllerFactory({
 			services,
 			Application,
+			db,
 		}),
 
 		'universal.remove': removeControllerFactory({
 			services,
 			Application,
+			db,
 		}),
 
 		'universal.today': todayControllerFactory({

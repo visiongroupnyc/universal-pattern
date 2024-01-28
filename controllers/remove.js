@@ -1,10 +1,15 @@
 const debug = require('debug')('up:controllers:remove');
+const UPFire = require('../libs/upfire');
 
 function removeControllerFactory({
 	services,
 	Application,
+	db,
 }) {
 	debug('Factory called');
+	const upFire = UPFire({
+		db,
+	});
 	return async (req, res, next) => {
 		debug('Called');
 
@@ -25,6 +30,10 @@ function removeControllerFactory({
 			}
 			if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].afterRemove) {
 				removedDocument = await Application.hooks[req.swagger.apiPath].afterRemove(req, { ...removedDocument }, Application);
+			}
+
+			if (req.swagger.definition['x-swagger-fire']) {
+				await upFire(req, removedDocument);
 			}
 
 			return res.json({ ...removedDocument });

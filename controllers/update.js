@@ -1,16 +1,20 @@
 const debug = require('debug')('up:controllers:update');
+const UPFire = require('../libs/upfire');
 
 function updateControllerFactory({
 	services,
 	Application,
+	db,
 }) {
 	debug('Factory called');
+	const upFire = UPFire({
+		db,
+	});
+
 	return async (req, res, next) => {
 		debug('Called');
 		let data = req.swagger.params.modeldata.value;
 		const { _id } = { ...data };
-
-		debug('.update called: ', data);
 
 		try {
 			if (Application.hooks['*'] && Application.hooks['*'].beforeUpdate) {
@@ -32,6 +36,9 @@ function updateControllerFactory({
 				updateDocument = await Application.hooks[req.swagger.apiPath].afterUpdate(req, { ...updateDocument }, Application);
 			}
 
+			if (req.swagger.definition['x-swagger-fire']) {
+				await upFire(req, updateDocument);
+			}
 			return res.json({ ...updateDocument });
 		} catch (err) {
 			return next(err);

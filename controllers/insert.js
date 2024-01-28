@@ -1,4 +1,5 @@
 const debug = require('debug')('up:controllers:insert');
+const UPFire = require('../libs/upfire');
 
 function insertControllerFactory({
 	services,
@@ -6,16 +7,18 @@ function insertControllerFactory({
 	Application,
 	uniqueProcess,
 	injectDefaultModel,
+	db,
 }) {
 	debug('Factory called');
+	const upFire = UPFire({
+		db,
+	});
+
 	return async (req, res, next) => {
 		debug('Called');
 
-		let params = req.swagger.params.modeldata.value;
-
 		try {
-			console.info('req.swagger.params.modeldata: ', req.swagger.definition);
-
+			let params = req.swagger.params.modeldata.value;
 			if (req.swagger.params.modeldata && req.swagger.params.modeldata['x-swagger-unique'] && req.swagger.params.modeldata['x-swagger-unique'].length > 0) {
 				await Promise.all(
 					req.swagger.params.modeldata['x-swagger-unique']
@@ -56,6 +59,9 @@ function insertControllerFactory({
 
 			if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].afterInsert) {
 				doc = await Application.hooks[req.swagger.apiPath].afterInsert(req, doc, Application);
+			}
+			if (req.swagger.definition['x-swagger-fire']) {
+				await upFire(req, doc);
 			}
 
 			return res.json(doc);
