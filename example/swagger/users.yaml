@@ -5,6 +5,9 @@ paths:
         - users
       summary: users list
       x-swagger-router-controller: universal.search
+      x-swagger-public-field:
+        - firstName
+        - lastName
       parameters:
         - $ref: '#/parameters/q'
         - $ref: '#/parameters/page'
@@ -67,16 +70,39 @@ paths:
           schema:
             $ref: '#/definitions/user'
 
+  /users/login:
+    post:
+      x-swagger-router-controller: Users.login
+      tags:
+        - users
+      description: Authenticate using email and password
+      parameters:
+        - in: body
+          name: modeldata
+          description: An object containing the user credentials.
+          required: true
+          schema:
+            $ref: '#/definitions/Credentials'
+      responses:
+        '200':
+          description: user Profile.
+          schema:
+            $ref: '#/definitions/user'
+
 definitions:
   userInput:
     type: object
     properties:
-      firstname:
+      firstName:
         type: string
         required: true
-      lastname:
+      lastName:
         type: string
         required: true
+      password:
+        type: string
+        required: true
+        minLength: 6
       email:
         type: string
         format: email
@@ -107,3 +133,14 @@ definitions:
         type: number
       totalPhotos:
         type: number
+
+  Credentials:
+    type: object
+    properties:
+      email:
+        type: string
+        format: email
+        required: true
+      password:
+        type: string
+        required: true

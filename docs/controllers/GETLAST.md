@@ -16,4 +16,3 @@ Retorna el último documento insertado en una colleciton.
           schema:
             $ref: '#/definitions/car'
 ```
-

@@ -25,17 +25,16 @@ const swaggerMetadata = (Application) => {
 				validateParameters(req, data, req.swagger.params);
 
 				req.swagger.definition = swagger.paths[url][method];
-				const keys = Object.keys(req.body);
-				if (keys.length > 0) {
-					keys.forEach((k) => {
-						if (!req.swagger.params.modeldata.value[k]) {
-							req.swagger.params.modeldata.value[k] = req.body[k];
-						}
-					});
+
+				if (req.swagger.params.body) {
+					req.swagger.params.modeldata = {
+						value: {
+							...req.swagger.params.body.modeldata.value.body,
+						},
+					};
 				}
 
 				if (data?.modeldata?.schema) {
-					debug('mws: with schema');
 					req.swagger.params.modeldata['x-swagger-unique'] = [];
 					req.swagger.params.modeldata['x-swagger-lookup'] = [];
 
