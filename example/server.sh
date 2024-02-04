@@ -6,5 +6,5 @@ export DBNAME=uptesting
 export BASEPATH=/services
 export JWT_SECRET=YouNeedChangeThis
 export APP_SALT_SECONDAY=changeSecondarySalt
-#nodemon index.js
-sudo perf record -e cycles:u -g -- node --perf-basic-prof index.js
+nodemon index.js
+# sudo perf record -e cycles:u -g -- node --perf-basic-prof index.js

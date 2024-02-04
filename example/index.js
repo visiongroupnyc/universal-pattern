@@ -57,7 +57,8 @@ const params = {
 		uri: process.env.CONNECTION,
 		name: process.env.DBNAME,
 	},
-	enabledStats: false,
+	enabledStats: true,
+	cache: true,
 };
 
 async function init() {

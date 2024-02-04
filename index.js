@@ -31,8 +31,9 @@ const swaggerRouter = require('./libs/swagger-router');
 
 const GlobalHooks = require('./hooks');
 
+const cache = require('./libs/cache');
+
 let internalStats = {};
-const requestCache = {};
 
 let db = null;
 const getModule = (url) => url.replace('/', '')
@@ -89,8 +90,9 @@ async function universalPattern(options = {}) {
 		express,
 		cors: true,
 		production: true,
-		routeController: (req, res, next) => { next(); },
+		routeController: async (req, res, next) => { next(); },
 		port: options?.port || 3000,
+		cache: false,
 	};
 
 	if (options.database) {
@@ -109,27 +111,22 @@ async function universalPattern(options = {}) {
 	const UP = {
 		localOptions,
 		db,
-		// app,
 		getModule,
 		instanceId: randomUUID(),
 	};
 
+	if (localOptions?.enabledStats) {
+		app.get('/stats', async (req, res) => res.json(internalStats));
+
+		app.use(async (req, res, next) => {
+			if (!process.isPrimary) process.send({ cmd: 'notifyRequest', instanceId: UP.instanceId });
+			next();
+		});
+	}
+
+	app.use(cache(localOptions?.enabledStats));
+
 	app.use(async (req, res, next) => {
-		const returnJSON = res.json;
-		const key = `${req.metod}:${req.url}`;
-		res.json = (...args) => {
-			requestCache[key] = args[0];
-			returnJSON.apply(res, args);
-			if (args[0].__clearCache) delete requestCache[key];
-		};
-
-		if (requestCache[key]) {
-			return res.json(requestCache[key]);
-		}
-		return next();
-	});
-
-	app.use((req, res, next) => {
 		req.instanceId = UP.instanceId;
 		next();
 	});
@@ -153,7 +150,7 @@ async function universalPattern(options = {}) {
 	localOptions.preMWS.forEach((mws) => app.use(mws));
 
 	if (localOptions.compress) app.use(compression({ level: 9 }));
-	if (localOptions.compress) app.use(cors());
+	if (localOptions.cors) app.use(cors());
 
 	const yamlContent = [...readdirSync(localOptions.swagger.folder)
 		.map((file) => {
@@ -174,15 +171,6 @@ async function universalPattern(options = {}) {
 			res.end(content.replace('[[URL]]', `${localOptions.swagger.baseDoc}/api-docs`));
 		});
 		app.use(`${localOptions.swagger.baseDoc}/api-docs`, (req, res) => res.json(UP.swagger));
-	}
-
-	if (localOptions?.enabledStats) {
-		app.get('/stats', async (req, res) => res.json(internalStats));
-
-		app.use(async (req, res, next) => {
-			if (!process.isPrimary) process.send({ cmd: 'notifyRequest', instanceId: UP.instanceId });
-			next();
-		});
 	}
 
 	app.use(swaggerMetadata(UP));

@@ -10,7 +10,7 @@ function searchControllerFactory({
 		debug('Called: ', req.swagger.params.query);
 
 		let { q, sorting } = req.swagger.params.query;
-		console.info('q & sorting: ', q, sorting);
+
 		const {
 			page,
 			limit,
@@ -115,7 +115,6 @@ function searchControllerFactory({
 				populateFields[f.trim()] = 1;
 			});
 		}
-		console.info('populateFields: ', populateFields);
 
 		try {
 			const searchParams = {
