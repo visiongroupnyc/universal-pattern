@@ -16,8 +16,10 @@ const validateParameters = (req, params, level = {}) => {
 				if (v.schema) {
 					method = 'body';
 				}
-				if (v.schema && v.schema.type === 'object') {
-					level[k] = {
+				if (!level[method]) level[method] = {};
+
+				if (v?.schema?.type === 'object' && method === 'body') {
+					level[method][k] = {
 						value: {
 							...validateParameters(req, v.schema.properties, {}),
 						},
@@ -27,32 +29,37 @@ const validateParameters = (req, params, level = {}) => {
 
 				if (v.type === 'number' || v.type === 'integer') {
 					const value = validNumber(req, method, k, v);
-					level = { ...level, [k]: value };
+					level[method][k] = value;
+					// level = { ...level, [method][k]: value };
 					return level;
 				}
 
 				if (v.type === 'string') {
 					const value = validString(req, method, k, v);
-					level = { ...level, [k]: value };
+					level[method][k] = value;
+					// level = { ...level, [k]: value };
 					return level;
 				}
 
 				if (v.type === 'boolean') {
 					const value = validBoolean(req, method, k, v);
-					level = { ...level, [k]: value };
+					level[method][k] = value;
+					// level = { ...level, [k]: value };
 					return level;
 				}
 
 				if (v.type === 'array') {
 					const value = validArray(req, method, k, v);
-					level = { ...level, [k]: value };
+					level[method][k] = value;
+					// level = { ...level, [k]: value };
 					return level;
 				}
 
 				if (v.type === 'object') {
 					const value = validObject(req, method, k, v);
 					if (value) {
-						level = { ...level, [k]: value };
+						// level = { ...level, [k]: value };
+						level[method][k] = value;
 						return level;
 					}
 				}
@@ -65,6 +72,7 @@ const validateParameters = (req, params, level = {}) => {
 				level = { ...level, [k]: req[method][k] };
 				return level;
 			} catch (err) {
+				console.info('se cago validando: ', err);
 				throw Error(`${err.toString()}`);
 			}
 		});

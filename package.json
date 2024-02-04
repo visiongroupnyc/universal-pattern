@@ -1,6 +1,6 @@
 {
   "name": "universal-pattern",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -8,19 +8,23 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lortmorris/universal-pattern.git"
+    "url": "git+https://github.com/visiongroupnyc/universal-pattern.git"
   },
   "keywords": [
     "universal",
     "pattern",
     "swagger",
     "restfull",
-    "api"
+    "api",
+    "visiongroup",
+    "nodejs",
+    "mongodb",
+    "microservices"
   ],
   "author": "César Casas",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/lortmorris/universal-pattern/issues"
+    "url": "https://github.com/visiongroupnyc/universal-pattern/issues"
   },
   "engines": {
     "node": ">= 18.0.0"
@@ -31,10 +35,11 @@
       "email": "cesar@visiongroup.nyc"
     }
   ],
-  "homepage": "https://github.com/lortmorris/universal-pattern#readme",
+  "homepage": "https://github.com/visiongroupnyc/universal-pattern#readme",
   "dependencies": {
     "body-parser": "^1.20.2",
     "compression": "^1.7.4",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "debug": "^4.3.4",
     "express": "^4.18.2",
@@ -47,6 +52,9 @@
     "@babel/eslint-parser": "^7.23.3",
     "eslint": "^8.56.0",
     "eslint-config-airbnb": "^19.0.4",
-    "nodemon": "^3.0.3"
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "nodemon": "^3.0.3",
+    "uuid": "^9.0.1"
   }
 }

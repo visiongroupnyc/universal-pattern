@@ -22,7 +22,9 @@ paths:
         - brands
       summary: insert new brand
       x-swagger-router-controller: universal.insert
+
       parameters:
+        - $ref: '#/parameters/Authorization'
         - name: modeldata
           in: body
           required: true

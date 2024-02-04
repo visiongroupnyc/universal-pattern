@@ -73,6 +73,8 @@ const controllers = (Application) => {
 			lookupProcess,
 			uniqueProcess,
 			injectDefaultModel,
+			Application,
+			db,
 		}),
 
 		'universal.update': updateControllerFactory({

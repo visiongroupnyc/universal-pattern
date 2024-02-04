@@ -1,3 +1,36 @@
+![Universal pattern](docs/assets/logo.png)
+
+Powered by [Cesar Casas](https://www.linkedin.com/in/cesarcasas)
+
+
+# Contenido
+
+- [Contenido](#contenido)
+- [Universal Pattern 💻](#universal-pattern-)
+	- [📚 Características Destacadas](#-características-destacadas)
+		- [Definición Sencilla de Módulos y Endpoints](#definición-sencilla-de-módulos-y-endpoints)
+		- [Integración Automatizada con Swagger para Documentación y Pruebas](#integración-automatizada-con-swagger-para-documentación-y-pruebas)
+		- [Automatización de Validaciones y Control de Parámetros](#automatización-de-validaciones-y-control-de-parámetros)
+	- [📋 Requerimientos](#-requerimientos)
+- [💻 Instalación](#-instalación)
+- [👨‍💼 Primer modulo](#-primer-modulo)
+	- [Crear directorios](#crear-directorios)
+	- [Creando module yaml](#creando-module-yaml)
+	- [Creamos app.js](#creamos-appjs)
+	- [Ejecutando!](#ejecutando)
+- [Preguntas frecuentes](#preguntas-frecuentes)
+	- [👨‍💻 Arquitectura y Flujo de Trabajo](#-arquitectura-y-flujo-de-trabajo)
+	- [👨‍💻 Personalización y Extensibilidad](#-personalización-y-extensibilidad)
+	- [🛡️ Seguridad y Autenticación](#️-seguridad-y-autenticación)
+	- [👨‍💻 Rendimiento y Escalabilidad](#-rendimiento-y-escalabilidad)
+	- [👨‍💻 Soporte y Comunidad](#-soporte-y-comunidad)
+- [x-swagger-properties](#x-swagger-properties)
+	- [x-swagger-public-field](#x-swagger-public-field)
+	- [x-swagger-router-controller](#x-swagger-router-controller)
+- [Ejemplo](#ejemplo)
+- [License](#license)
+
+
 # Universal Pattern 💻
 ![Universal pattern](docs/assets/universal-pattern-features.png)
 
@@ -11,7 +44,6 @@ Dentro de la definición del archivo swagger, estableceremos los distintos endpo
 Podemos definir que tipo de datos de entrada necesitamos, y cual será el dato de salida.
 
 Como ya se estará dando cuenta, el propócito de Universal Pattern es poder definir módulos y que los mismos funcionen, sin necesidad de programación adicional (es decir, no tener que escribir el código de los módulos).
-
 
 ## 📚 Características Destacadas
 
@@ -96,39 +128,11 @@ definitions:
             - brands.name
 ```
 
-Powered by [Cesar Casas](https://www.linkedin.com/in/cesarcasas)
-
-[Vision Group NYC](https://visiongroup.nyc)
-
-# Contenido
-
-- [Universal Pattern 💻](#universal-pattern-)
-	- [📚 Características Destacadas](#-características-destacadas)
-		- [Definición Sencilla de Módulos y Endpoints](#definición-sencilla-de-módulos-y-endpoints)
-		- [Integración Automatizada con Swagger para Documentación y Pruebas](#integración-automatizada-con-swagger-para-documentación-y-pruebas)
-		- [Automatización de Validaciones y Control de Parámetros](#automatización-de-validaciones-y-control-de-parámetros)
-- [Contenido](#contenido)
-	- [📋 Requerimientos](#-requerimientos)
-- [💻 Instalación](#-instalación)
-- [👨‍💼 Primer modulo](#-primer-modulo)
-	- [Crear directorios](#crear-directorios)
-	- [Creando module yaml](#creando-module-yaml)
-	- [Creamos app.js](#creamos-appjs)
-	- [Ejecutando!](#ejecutando)
-- [Preguntas frecuentes](#preguntas-frecuentes)
-	- [👨‍💻 Arquitectura y Flujo de Trabajo](#-arquitectura-y-flujo-de-trabajo)
-	- [👨‍💻 Personalización y Extensibilidad](#-personalización-y-extensibilidad)
-	- [🛡️ Seguridad y Autenticación](#️-seguridad-y-autenticación)
-	- [👨‍💻 Rendimiento y Escalabilidad](#-rendimiento-y-escalabilidad)
-	- [👨‍💻 Soporte y Comunidad](#-soporte-y-comunidad)
-- [Ejemplo](#ejemplo)
-- [License](#license)
-
 ## 📋 Requerimientos
 Antes de comenzar a trabajar con Universal Pattern, debemos tener instalado previamente
 
-- Node.js (version 20 o superior)
-- MongoDB
+- Node.js (version 18 o superior)
+- MongoDB 6 o superior
 
 # 💻 Instalación
 Recomendamos utilizar Universal Pattern desde un entorno Linux, aunque funcionará sin problemas en entornos Windows y MacOS.
@@ -314,6 +318,16 @@ const params = {
 			},
 		},
 	},
+	preMWS: [], // array con middleware que se ejecutarán antes que Universal Pattern
+	postMWS: [], // array con middleware que se ejecutarán despues del flow request de UP.
+	bodyParser: { // configuraciones para el MWS bodyParser.
+		json: { limit: '2mb' }, // seteamos el limit del tamaño de los objetos enviados por body
+		urlencoded: { limit: '500mb', extended: false },
+	},
+	express: { // configuraciones adicionales de express
+		json: { limit: 10485760 }, // límite del json
+		static: 'public', // directorio público.
+	},
 	compress: true, // indica que el output deberá estar comprimido
 	cors: true, // habilita cors
 	production: false, // indica si está en modo producción. En modo producción no se permite el acceso a la documentación
@@ -323,6 +337,7 @@ const params = {
 		uri: process.env.CONNECTION, // string de connection a la base de datos
 		name: process.env.DBNAME, // nombre de la base de datos
 	},
+	enabledStats: true, // activa el modo stats, el cual podemos consumir en el path `/stats`
 };
 
 async function init() {
@@ -410,7 +425,7 @@ Universal pattern nos aporta controladores como:
 - universal.remove: elimina un documento de la collection.
 - universal.count: cuenta los documentos de una collection.
 - universal.today: retorna todos los documentos del día actual.
-- universa.getLast: retorna el último documento de una collection.
+- universal.getLast: retorna el último documento de una collection.
 - universal.distinct: retorna todos los valores distintos de la field indicada.
 - universal.insertOrCount: intentará insertar un documento siempre y cuando el key/value indicado no exista previamente. En caso de que exista, retornará error, pero sumará en 1 la prop `_count`.
 
@@ -462,12 +477,50 @@ En este sentido, tenemos varios puntos a considerar.
 ```
 ¿Cómo es el soporte y la comunidad alrededor de Universal Pattern? ¿Hay una base de usuarios activa o foros donde los desarrolladores pueden buscar ayuda y compartir mejores prácticas?
 ```
-Contamos con una comunidad en [Telegram](https://t.me/universalpattern).
+- Comunidad en [Telegram](https://t.me/universalpattern).
+- Comunidad en [Linkedin](https://www.linkedin.com/groups/9580792/)
+
 Adicionalmente, pueden visitar el repositorio en [github](https://github.com/visiongroupnyc/universal-pattern/issues)
 
 
+# x-swagger-properties
+
+## x-swagger-public-field
+Indica que propiedades se deben popular en la respuesta de un endpoint.
+
+```yaml
+paths:
+  /users:
+    get:
+      tags:
+        - users
+      summary: users list
+      x-swagger-router-controller: universal.search
+      x-swagger-public-field:
+        - firstName
+        - lastName
+      parameters:
+        - $ref: '#/parameters/q'
+        - $ref: '#/parameters/page'
+        - $ref: '#/parameters/sorting'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/fields'
+```
+
+## x-swagger-router-controller
+Indica el nombre del controlador que deseamos utilizar.
+El mismo puede ser propio de universal pattern o uno creado de forma customizada.
+A continuación, el listado de controladores soportados en Universal Pattern.
+- [insert](./docs/controllers/INSERT.md)
+- [search](./docs/controllers/SEARCH.md)
+- [remove](./docs/controllers/REMOVE.md)
+- [count](./docs/controllers/COUNT.md)
+- [today](./docs/controllers/TODAY.md)
+- [getLast](./docs/controllers/GETLAST.md)
+
+
 # Ejemplo
-Podemos ver un ejemplo completo de implementación en [este link](https://github.com/visiongroupnyc/universal-pattern/tree/master/test)
+Podemos ver un ejemplo completo de implementación en [este link](example/README.md)
 
 # License
 [MIT](LICENSE)

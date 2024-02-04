@@ -6,6 +6,13 @@ const {
 } = require('node:fs');
 const http = require('node:http');
 
+const cluster = require('node:cluster');
+const numCPUs = require('node:os').availableParallelism();
+const process = require('node:process');
+const {
+	randomUUID,
+} = require('node:crypto');
+
 const vgMongo = require('vg-mongo');
 
 const yaml = require('js-yaml');
@@ -15,11 +22,14 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const compression = require('compression');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
 const services = require('./services');
 const controllers = require('./controllers');
 const swaggerMetadata = require('./libs/swagger-metadata');
 const swaggerRouter = require('./libs/swagger-router');
+
+let internalStats = {};
 
 const hasMWS = (app, module = 'none') => app._router.stack.filter((mws) => mws.name === module).length > 0;
 let db = null;
@@ -43,10 +53,11 @@ const registerController = (UP) => (name, controller) => {
 
 async function universalPattern(options = {}) {
 	const app = express();
-	const server = http.createServer(app);
 	const folder = path.join(__dirname, './swagger');
 	const defaultOptions = {
 		swagger: {
+			preMWS: [],
+			postMWS: [],
 			baseDoc: '/core',
 			host: 'localhost',
 			apiDocs: 'api-docs',
@@ -65,6 +76,7 @@ async function universalPattern(options = {}) {
 			},
 		},
 		compress: true,
+		express,
 		cors: true,
 		production: true,
 		routeController: (req, res, next) => { next(); },
@@ -89,11 +101,31 @@ async function universalPattern(options = {}) {
 		db,
 		app,
 		getModule,
-		instanceId: new Date().getTime(),
+		instanceId: randomUUID(),
 	};
 
-	app.use(bodyParser.urlencoded({ extended: false }));
-	app.use(bodyParser.json());
+	app.use((req, res, next) => {
+		req.instanceId = UP.instanceId;
+		next();
+	});
+
+	const urlencodeLimit = localOptions?.urlencoded?.limit || '1mb';
+	app.use(bodyParser.urlencoded({ limit: urlencodeLimit, extended: false }));
+	app.disable('view cache');
+	const jsonLimit = localOptions?.bodyParser?.limit || '1mb';
+	app.use(bodyParser.json({ limit: jsonLimit }));
+	app.use(bodyParser.text());
+
+	app.use(cookieParser());
+	if (localOptions.express) {
+		if (localOptions.express.limit) {
+			app.use(express.json({ limit: localOptions.express.limit }));
+		}
+		if (localOptions.express.static) {
+			app.use(express.static(localOptions.express.static));
+		}
+	}
+	localOptions.preMWS.forEach((mws) => app.use(mws));
 
 	if (!hasMWS(app, 'compression') && localOptions.compress) app.use(compression({ level: 9 }));
 	if (!hasMWS(app, 'cors') && localOptions.compress) app.use(cors());
@@ -119,6 +151,15 @@ async function universalPattern(options = {}) {
 		app.use(`${localOptions.swagger.baseDoc}/api-docs`, (req, res) => res.json(UP.swagger));
 	}
 
+	if (localOptions?.enabledStats) {
+		app.get('/stats', async (req, res) => res.json(internalStats));
+
+		app.use(async (req, res, next) => {
+			if (!process.isPrimary) process.send({ cmd: 'notifyRequest', instanceId: UP.instanceId });
+			next();
+		});
+	}
+
 	app.use(swaggerMetadata(UP));
 	UP.services = services(UP);
 	UP.controllers = controllers(UP);
@@ -126,7 +167,50 @@ async function universalPattern(options = {}) {
 	swaggerRouter(UP);
 	UP.addHook = addHook(UP);
 	UP.registerController = registerController(UP);
-	server.listen(defaultOptions.port);
+	localOptions.postMWS.forEach((mws) => app.use(mws));
+
+	/*
+		Cluster or child
+	*/
+	if (cluster.isPrimary) {
+		debug(`Primary ${process.pid} is running with instanceId: ${UP.instanceId}`);
+
+		const stats = {};
+		const messageHandler = (msg) => {
+			if (msg.cmd && msg.cmd === 'notifyNewFork') {
+				stats[msg.instanceId] = 0;
+			}
+
+			if (msg.cmd && msg.cmd === 'notifyRequest') {
+				stats[msg.instanceId] += 1;
+				for (const id in cluster.workers) {
+					cluster.workers[id].send({
+						cmd: 'notifyInternalStats',
+						stats,
+					});
+				}
+			}
+		};
+
+		for (let i = 0; i < numCPUs; i += 1) {
+			const forked = cluster.fork();
+			forked.on('message', messageHandler);
+		}
+		cluster.on('exit', (worker) => {
+			debug(`worker ${worker.process.pid} died`);
+		});
+	} else {
+		process.send({ cmd: 'notifyNewFork', instanceId: UP.instanceId });
+		process.on('message', (msg) => {
+			if (msg.cmd && msg.cmd === 'notifyInternalStats') {
+				internalStats = msg.stats;
+			}
+		});
+		const server = http.createServer(app);
+		server.listen(defaultOptions.port);
+		debug(`Worker ${process.pid} started with instanceId ${UP.instanceId}`);
+	}
+
 	debug(`ready on *:${defaultOptions.port}`);
 	return UP;
 }
