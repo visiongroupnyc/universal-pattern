@@ -1,6 +1,7 @@
-const debug = require('debug')('up:hooks:global');
+const debug = require('debug')('up:example:hooks:global');
 
 function GlobalHooks(upInstance) {
+	debug('GlobalHooks called');
 	const {
 		addHook,
 	} = upInstance;
@@ -27,10 +28,10 @@ function GlobalHooks(upInstance) {
 		}
 	}
 
-	async function beforeSearch(req, dataDocument) {
+	async function beforeSearch(req, query) {
 		try {
-			debug('beforeSearch global called: ', dataDocument);
-			return dataDocument;
+			debug('beforeSearch global called: ', query);
+			return query;
 		} catch (err) {
 			debug(err.message);
 			throw err;
@@ -39,23 +40,8 @@ function GlobalHooks(upInstance) {
 
 	async function afterSearch(req, dataDocument) {
 		try {
-			debug('afterSearch called: ');
-			let { docs } = dataDocument;
-			if (req?.swagger?.definition['x-swagger-public-field']) {
-				docs = docs.map((d) => Object.fromEntries(
-					Object
-						.entries(d)
-						.filter(([k]) => req.swagger.definition['x-swagger-public-field'].includes(k)),
-				));
-			} else if (req.endpoint.skipFields) {
-				docs.forEach((doc) => {
-					req.endpoint.skipFields.forEach((field) => {
-						delete doc[field];
-					});
-				});
-			}
-
-			dataDocument.docs = docs;
+			debug('afterSearch global called: ', dataDocument);
+			dataDocument.docs = dataDocument.docs.map((doc) => ({ ...doc, alterByGlobalHook: true }));
 			return dataDocument;
 		} catch (err) {
 			debug(err.message);

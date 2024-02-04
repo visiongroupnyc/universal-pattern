@@ -5,6 +5,11 @@ paths:
         - brands
       summary: brands list
       x-swagger-router-controller: universal.search
+      x-swagger-skip-fields:
+        - _n
+        - _v
+        - _retry
+        - added
       parameters:
         - $ref: '#/parameters/q'
         - $ref: '#/parameters/page'

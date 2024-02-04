@@ -25,11 +25,14 @@ Powered by [Cesar Casas](https://www.linkedin.com/in/cesarcasas)
 	- [👨‍💻 Rendimiento y Escalabilidad](#-rendimiento-y-escalabilidad)
 	- [👨‍💻 Soporte y Comunidad](#-soporte-y-comunidad)
 - [x-swagger-properties](#x-swagger-properties)
-	- [x-swagger-public-field](#x-swagger-public-field)
+	- [x-swagger-public-fields](#x-swagger-public-fields)
+	- [x-swagger-skip-fields](#x-swagger-skip-fields)
 	- [x-swagger-router-controller](#x-swagger-router-controller)
 - [Clustering.](#clustering)
 - [Performance testing](#performance-testing)
 - [Ejemplo](#ejemplo)
+- [Test](#test)
+- [Changelog](#changelog)
 - [License](#license)
 
 
@@ -487,8 +490,13 @@ Adicionalmente, pueden visitar el repositorio en [github](https://github.com/vis
 
 # x-swagger-properties
 
-## x-swagger-public-field
+## x-swagger-public-fields
 Indica que propiedades se deben popular en la respuesta de un endpoint.
+
+
+## x-swagger-skip-fields
+Indica que las propiedades no deben ser populadas.
+
 
 ```yaml
 paths:
@@ -556,6 +564,12 @@ Req/Bytes counts sampled once per second.
 
 # Ejemplo
 Podemos ver un ejemplo completo de implementación en [este link](example/README.md)
+
+# Test
+[Documentacion de test](test/README.md)
+
+# Changelog
+See changelog [here](CHANGELOG.md)
 
 # License
 [MIT](LICENSE)

@@ -8,6 +8,7 @@ function insertControllerFactory({
 	uniqueProcess,
 	injectDefaultModel,
 	db,
+	action = 'insert',
 }) {
 	debug('Factory called');
 	const upFire = UPFire({
@@ -45,25 +46,31 @@ function insertControllerFactory({
 			}
 
 			if (Application.hooks['*'] && Application.hooks['*'].beforeInsert) {
-				params = await Application.hooks['*'].beforeInsert(req, params, Application);
+				params = await Application.hooks['*'].beforeInsert(req, params);
 			}
 			if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].beforeInsert) {
-				params = await Application.hooks[req.swagger.apiPath].beforeInsert(req, params, Application);
+				params = await Application.hooks[req.swagger.apiPath].beforeInsert(req, params);
 			}
 
-			let doc = await services.insert(req.swagger.apiPath, injectDefaultModel(params, req));
+			let doc = null;
+			if (action === 'insert') {
+				doc = await services.insert(req.swagger.apiPath, injectDefaultModel(params, req));
+			} else {
+				doc = await services.insertOrCount(req.swagger.apiPath, injectDefaultModel(params, req));
+			}
 
 			if (Application.hooks['*'] && Application.hooks['*'].afterInsert) {
-				params = await Application.hooks['*'].afterInsert(req, params, Application);
+				params = await Application.hooks['*'].afterInsert(req, params);
 			}
 
 			if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].afterInsert) {
-				doc = await Application.hooks[req.swagger.apiPath].afterInsert(req, doc, Application);
+				doc = await Application.hooks[req.swagger.apiPath].afterInsert(req, doc);
 			}
 			if (req.swagger.definition['x-swagger-fire']) {
 				await upFire(req, doc);
 			}
-
+			// remove cache
+			res.__clearCache = true;
 			return res.json(doc);
 		} catch (err) {
 			return next(err);

@@ -1,14 +1,15 @@
 const debug = require('debug')('up:libs:swagger-router');
 
 const swaggerRouter = (Application) => {
-	const { app, controllers, swagger } = Application;
-	const { paths } = swagger;
-	const swaggerRouterManager = (props) => (req, res, next) => Application.localOptions.routeController(req, res, next, props);
+	const {
+		app,
+		controllers,
+		swagger,
+		localOptions,
+	} = Application;
 
-	app.use((req, res, next) => {
-		req.Application = Application;
-		next();
-	});
+	const { paths } = swagger;
+	const swaggerRouterManager = (props) => (req, res, next) => localOptions.routeController(req, res, next, props);
 
 	Object.entries(paths)
 		.forEach(([path, value]) => {

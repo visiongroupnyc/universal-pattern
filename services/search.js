@@ -16,7 +16,7 @@ function searchFactory({
 		};
 		const result = await db[collection].paginate(
 			pages.q || {},
-			fields,
+			{ projection: fields },
 			pagination,
 			opts,
 		);

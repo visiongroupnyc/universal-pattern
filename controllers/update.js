@@ -18,22 +18,22 @@ function updateControllerFactory({
 
 		try {
 			if (Application.hooks['*'] && Application.hooks['*'].beforeUpdate) {
-				data = await Application.hooks['*'].beforeUpdate(req, data, Application);
+				data = await Application.hooks['*'].beforeUpdate(req, data);
 			}
 
 			if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].beforeUpdate) {
-				data = await Application.hooks[req.swagger.apiPath].beforeUpdate(req, data, Application);
+				data = await Application.hooks[req.swagger.apiPath].beforeUpdate(req, data);
 			}
 
 			delete data._id;
 			let updateDocument = await services.update(req.swagger.apiPath, _id, data, { updated: true, set: true });
 
 			if (Application.hooks['*'] && Application.hooks['*'].afterUpdate) {
-				updateDocument = await Application.hooks['*'].afterUpdate(req, { ...updateDocument }, Application);
+				updateDocument = await Application.hooks['*'].afterUpdate(req, { ...updateDocument });
 			}
 
 			if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].afterUpdate) {
-				updateDocument = await Application.hooks[req.swagger.apiPath].afterUpdate(req, { ...updateDocument }, Application);
+				updateDocument = await Application.hooks[req.swagger.apiPath].afterUpdate(req, { ...updateDocument });
 			}
 
 			if (req.swagger.definition['x-swagger-fire']) {

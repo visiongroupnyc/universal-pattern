@@ -1,4 +1,6 @@
-const generateSalt = () => `${(Math.random() + Math.random()).toString(32)}`;
+const { randomUUID } = require('node:crypto');
+
+const generateSalt = () => `${randomUUID()}`;
 const getSalt = (salt) => `${salt}`;
 
 module.exports = {
