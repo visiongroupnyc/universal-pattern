@@ -27,6 +27,8 @@ Powered by [Cesar Casas](https://www.linkedin.com/in/cesarcasas)
 - [x-swagger-properties](#x-swagger-properties)
 	- [x-swagger-public-field](#x-swagger-public-field)
 	- [x-swagger-router-controller](#x-swagger-router-controller)
+- [Clustering.](#clustering)
+- [Performance testing](#performance-testing)
 - [Ejemplo](#ejemplo)
 - [License](#license)
 
@@ -518,6 +520,39 @@ A continuación, el listado de controladores soportados en Universal Pattern.
 - [today](./docs/controllers/TODAY.md)
 - [getLast](./docs/controllers/GETLAST.md)
 
+
+# Clustering.
+Universal Pattern de forma automática utilizará el módulo clustering de Node.js, creando fork por cada core disponible.
+
+# Performance testing
+Usando autocannon para medir la performance del example incluido en Universal Pattern
+```bash
+$ autocannon "http://localhost:5000/services/users?page=1&limit=30"
+```
+
+```bash
+Running 10s test @ http://localhost:5000/services/users?page=1&limit=30
+10 connections
+
+
+┌─────────┬──────┬──────┬───────┬──────┬─────────┬─────────┬───────┐
+│ Stat    │ 2.5% │ 50%  │ 97.5% │ 99%  │ Avg     │ Stdev   │ Max   │
+├─────────┼──────┼──────┼───────┼──────┼─────────┼─────────┼───────┤
+│ Latency │ 1 ms │ 1 ms │ 4 ms  │ 5 ms │ 1.48 ms │ 0.94 ms │ 23 ms │
+└─────────┴──────┴──────┴───────┴──────┴─────────┴─────────┴───────┘
+┌───────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┐
+│ Stat      │ 1%      │ 2.5%    │ 50%     │ 97.5%   │ Avg     │ Stdev   │ Min     │
+├───────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+│ Req/Sec   │ 3,239   │ 3,239   │ 5,099   │ 6,279   │ 5,088.5 │ 876.53  │ 3,239   │
+├───────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
+│ Bytes/Sec │ 4.36 MB │ 4.36 MB │ 6.86 MB │ 8.45 MB │ 6.84 MB │ 1.18 MB │ 4.36 MB │
+└───────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┘
+
+Req/Bytes counts sampled once per second.
+# of samples: 10
+
+51k requests in 10.02s, 68.4 MB read
+```
 
 # Ejemplo
 Podemos ver un ejemplo completo de implementación en [este link](example/README.md)
