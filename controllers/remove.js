@@ -20,22 +20,24 @@ function removeControllerFactory({
 				await Application.hooks['*'].beforeRemove(req, _id, Application);
 			}
 			if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].beforeRemove) {
-				await Application.hooks[req.swagger.apiPath].beforeRemove(req, _id, Application);
+				await Application.hooks[req.swagger.apiPath].beforeRemove(req, _id);
 			}
 
 			let removedDocument = await services.remove(req.swagger.apiPath, _id);
 
 			if (Application.hooks['*'] && Application.hooks['*'].afterRemove) {
-				removedDocument = await Application.hooks['*'].afterRemove(req, { ...removedDocument }, Application);
+				removedDocument = await Application.hooks['*'].afterRemove(req, { ...removedDocument });
 			}
 			if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].afterRemove) {
-				removedDocument = await Application.hooks[req.swagger.apiPath].afterRemove(req, { ...removedDocument }, Application);
+				removedDocument = await Application.hooks[req.swagger.apiPath].afterRemove(req, { ...removedDocument });
 			}
 
 			if (req.swagger.definition['x-swagger-fire']) {
 				await upFire(req, removedDocument);
 			}
 
+			// remove cache
+			res.__clearCache = true;
 			return res.json({ ...removedDocument });
 		} catch (err) {
 			return next(err);

@@ -29,9 +29,12 @@ const controllers = require('./controllers');
 const swaggerMetadata = require('./libs/swagger-metadata');
 const swaggerRouter = require('./libs/swagger-router');
 
+const GlobalHooks = require('./hooks');
+
+const cache = require('./libs/cache');
+
 let internalStats = {};
 
-const hasMWS = (app, module = 'none') => app._router.stack.filter((mws) => mws.name === module).length > 0;
 let db = null;
 const getModule = (url) => url.replace('/', '')
 	.split('?')
@@ -40,9 +43,17 @@ const getModule = (url) => url.replace('/', '')
 	.shift();
 
 const addHook = (UP) => (endpoint, method, cb) => {
-	debug('adding hook: ', endpoint);
+	debug('adding hook: ', endpoint, method);
 	if (!UP.hooks[endpoint]) UP.hooks[endpoint] = {};
-	UP.hooks[endpoint][method] = cb;
+	if (typeof UP.hooks[endpoint][method] === 'function') {
+		const prev = UP.hooks[endpoint][method];
+		UP.hooks[endpoint][method] = async (req, data) => {
+			await prev(req, data, cb);
+			return data;
+		};
+	} else {
+		UP.hooks[endpoint][method] = cb;
+	}
 };
 
 const registerController = (UP) => (name, controller) => {
@@ -65,13 +76,13 @@ async function universalPattern(options = {}) {
 			info: {
 				version: 2.0,
 				title: 'Server API',
-				termsOfService: 'http://visiongroup.nyc/terms',
+				termsOfService: 'https://visiongroup.nyc/terms',
 				contact: {
 					email: 'cesar@visiongroup.nyc',
 				},
 				license: {
 					name: 'Apache 2.0',
-					url: 'http://www.apache.org/licenses/LICENSE-2.0.html',
+					url: 'https://www.apache.org/licenses/LICENSE-2.0.html',
 				},
 			},
 		},
@@ -79,8 +90,9 @@ async function universalPattern(options = {}) {
 		express,
 		cors: true,
 		production: true,
-		routeController: (req, res, next) => { next(); },
+		routeController: async (req, res, next) => { next(); },
 		port: options?.port || 3000,
+		cache: false,
 	};
 
 	if (options.database) {
@@ -99,12 +111,22 @@ async function universalPattern(options = {}) {
 	const UP = {
 		localOptions,
 		db,
-		app,
 		getModule,
 		instanceId: randomUUID(),
 	};
 
-	app.use((req, res, next) => {
+	if (localOptions?.enabledStats) {
+		app.get('/stats', async (req, res) => res.json(internalStats));
+
+		app.use(async (req, res, next) => {
+			if (!process.isPrimary) process.send({ cmd: 'notifyRequest', instanceId: UP.instanceId });
+			next();
+		});
+	}
+
+	app.use(cache(localOptions?.enabledStats));
+
+	app.use(async (req, res, next) => {
 		req.instanceId = UP.instanceId;
 		next();
 	});
@@ -127,8 +149,8 @@ async function universalPattern(options = {}) {
 	}
 	localOptions.preMWS.forEach((mws) => app.use(mws));
 
-	if (!hasMWS(app, 'compression') && localOptions.compress) app.use(compression({ level: 9 }));
-	if (!hasMWS(app, 'cors') && localOptions.compress) app.use(cors());
+	if (localOptions.compress) app.use(compression({ level: 9 }));
+	if (localOptions.cors) app.use(cors());
 
 	const yamlContent = [...readdirSync(localOptions.swagger.folder)
 		.map((file) => {
@@ -151,22 +173,19 @@ async function universalPattern(options = {}) {
 		app.use(`${localOptions.swagger.baseDoc}/api-docs`, (req, res) => res.json(UP.swagger));
 	}
 
-	if (localOptions?.enabledStats) {
-		app.get('/stats', async (req, res) => res.json(internalStats));
-
-		app.use(async (req, res, next) => {
-			if (!process.isPrimary) process.send({ cmd: 'notifyRequest', instanceId: UP.instanceId });
-			next();
-		});
-	}
-
 	app.use(swaggerMetadata(UP));
 	UP.services = services(UP);
 	UP.controllers = controllers(UP);
 	UP.hooks = {};
-	swaggerRouter(UP);
+	UP.insternalHooks = {};
+	swaggerRouter({
+		...UP,
+		app,
+		localOptions,
+	});
 	UP.addHook = addHook(UP);
 	UP.registerController = registerController(UP);
+
 	localOptions.postMWS.forEach((mws) => app.use(mws));
 
 	/*
@@ -212,6 +231,7 @@ async function universalPattern(options = {}) {
 	}
 
 	debug(`ready on *:${defaultOptions.port}`);
+	GlobalHooks(UP);
 	return UP;
 }
 

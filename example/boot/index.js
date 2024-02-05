@@ -42,7 +42,6 @@ async function Boot(upInstance) {
 
 	const hasSuperAdminUser = await services.findOne('/users', { level: 50 });
 	if (!hasSuperAdminUser) {
-		console.info('without super admin user');
 		const salt = generateSalt();
 		await services.insert('/users', {
 			firstName: 'Universal',

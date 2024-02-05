@@ -3,19 +3,21 @@ const debug = require('debug')('up:controllers:search');
 function searchControllerFactory({
 	Application,
 	services,
+	db,
 }) {
 	debug('Factory called');
 	return async (req, res, next) => {
-		debug('Called');
+		debug('Called: ', req.swagger.params.query);
 
-		let { q, sorting } = req.swagger.params;
+		let { q, sorting } = req.swagger.params.query;
+
 		const {
 			page,
 			limit,
 			fields,
 			distinct,
 			coordinates,
-		} = req.swagger.params;
+		} = req.swagger.params.query;
 
 		if (q) {
 			const parts = q.split(',');
@@ -113,7 +115,7 @@ function searchControllerFactory({
 				populateFields[f.trim()] = 1;
 			});
 		}
-		req.q = q;
+
 		try {
 			const searchParams = {
 				page,
@@ -121,11 +123,13 @@ function searchControllerFactory({
 				q,
 				sorting,
 			};
+
 			if (Application.hooks['*'] && Application.hooks['*'].beforeSearch) {
-				q = await Application.hooks['*'].beforeSearch(req, searchParams, Application);
+				q = await Application.hooks['*'].beforeSearch(req, searchParams);
 			}
+
 			if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].beforeSearch) {
-				q = await Application.hooks[req.swagger.apiPath].beforeSearch(req, searchParams, Application);
+				q = await Application.hooks[req.swagger.apiPath].beforeSearch(req, searchParams);
 			}
 
 			let result = {};
@@ -147,10 +151,10 @@ function searchControllerFactory({
 			}
 
 			if (Application.hooks['*'] && Application.hooks['*'].afterSearch) {
-				result = await Application.hooks['*'].afterSearch(req, result, Application);
+				result = await Application.hooks['*'].afterSearch(req, result);
 			}
 			if (Application.hooks[req.swagger.apiPath] && Application.hooks[req.swagger.apiPath].afterSearch) {
-				result = await Application.hooks[req.swagger.apiPath].afterSearch(req, result, Application);
+				result = await Application.hooks[req.swagger.apiPath].afterSearch(req, result);
 			}
 			return res.json(result);
 		} catch (err) {

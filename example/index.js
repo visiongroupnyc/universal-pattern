@@ -34,7 +34,7 @@ const params = {
 			},
 			license: {
 				name: 'Apache',
-				url: 'http://www.apache.org/licenses/LICENSE-2.0.html',
+				url: 'https://www.apache.org/licenses/LICENSE-2.0.html',
 			},
 		},
 	},
@@ -57,7 +57,8 @@ const params = {
 		uri: process.env.CONNECTION,
 		name: process.env.DBNAME,
 	},
-	enabledStats: true,
+	enabledStats: true, // activa el ver las estadísticas
+	cache: true, // activa el cache
 };
 
 async function init() {

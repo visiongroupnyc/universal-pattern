@@ -1,3 +1,5 @@
+const debug = require('debug')('up:example:hooks:users');
+
 const encrypt = require('../helpers/encrypt');
 const { generateSalt } = require('../helpers/salt');
 
@@ -7,7 +9,7 @@ const users = (upInstance) => {
 	} = upInstance;
 
 	addHook('/users', 'beforeInsert', async (req, document) => {
-		console.info('hook users.beforeInsert: ', document);
+		debug('hook users.beforeInsert: ', document);
 		const salt = generateSalt();
 		document.password = encrypt(document.password, salt);
 		document.active = true;
@@ -17,7 +19,7 @@ const users = (upInstance) => {
 	});
 
 	addHook('/users', 'afterInsert', async (req, document) => {
-		console.info('hook users.afterInsert: ', document);
+		debug('hook users.afterInsert: ', document);
 		delete document.password;
 		delete document.salt;
 		return document;

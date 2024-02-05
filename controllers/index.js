@@ -4,7 +4,6 @@ const { ObjectId } = require('vg-mongo');
 const searchControllerFactory = require('./search');
 const findOneControllerFactory = require('./findone');
 const insertControllerFactory = require('./insert');
-const insertOrCountControllerFactory = require('./insertorcount');
 const removeControllerFactory = require('./remove');
 const updateControllerFactory = require('./update');
 const todayControllerFactory = require('./today');
@@ -66,15 +65,17 @@ const controllers = (Application) => {
 			uniqueProcess,
 			injectDefaultModel,
 			db,
+			action: 'insert',
 		}),
 
-		'universal.insertOrCount': insertOrCountControllerFactory({
+		'universal.insertOrCount': insertControllerFactory({
 			services,
 			lookupProcess,
 			uniqueProcess,
 			injectDefaultModel,
 			Application,
 			db,
+			action: 'insertOrCount',
 		}),
 
 		'universal.update': updateControllerFactory({
@@ -98,6 +99,7 @@ const controllers = (Application) => {
 		'universal.search': searchControllerFactory({
 			Application,
 			services,
+			db,
 		}),
 		'universal.getLast': getLastControllerFactory({
 			services,

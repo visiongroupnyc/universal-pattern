@@ -51,7 +51,7 @@ const usersController = (upInstance) => {
 			});
 
 			if (!exists) {
-				return res.status(404).end('User not found');
+				return res.status(401).end('Invalid user or password');
 			}
 
 			if (exists.password !== encrypt(password, getSalt(exists.salt))) {

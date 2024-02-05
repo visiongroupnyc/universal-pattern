@@ -25,11 +25,17 @@ Powered by [Cesar Casas](https://www.linkedin.com/in/cesarcasas)
 	- [👨‍💻 Rendimiento y Escalabilidad](#-rendimiento-y-escalabilidad)
 	- [👨‍💻 Soporte y Comunidad](#-soporte-y-comunidad)
 - [x-swagger-properties](#x-swagger-properties)
-	- [x-swagger-public-field](#x-swagger-public-field)
+	- [x-swagger-public-fields](#x-swagger-public-fields)
+	- [x-swagger-skip-fields](#x-swagger-skip-fields)
 	- [x-swagger-router-controller](#x-swagger-router-controller)
+- [Cache](#cache)
+	- [Midiendo la performance con cache activado:](#midiendo-la-performance-con-cache-activado)
+- [Stats.](#stats)
 - [Clustering.](#clustering)
 - [Performance testing](#performance-testing)
 - [Ejemplo](#ejemplo)
+- [Test](#test)
+- [Changelog](#changelog)
 - [License](#license)
 
 
@@ -487,8 +493,13 @@ Adicionalmente, pueden visitar el repositorio en [github](https://github.com/vis
 
 # x-swagger-properties
 
-## x-swagger-public-field
+## x-swagger-public-fields
 Indica que propiedades se deben popular en la respuesta de un endpoint.
+
+
+## x-swagger-skip-fields
+Indica que las propiedades no deben ser populadas.
+
 
 ```yaml
 paths:
@@ -521,11 +532,92 @@ A continuación, el listado de controladores soportados en Universal Pattern.
 - [getLast](./docs/controllers/GETLAST.md)
 
 
+# Cache
+Universal Pattern soporta actualmente un sistema simple de cache.
+Básicamente, memorizará todos los request del method GET hacia los distintos endpoints, almacenando la respuesta enviada.
+Por el momento no soporta ttl en el sistema de cache, sin embargo el cache se elimina automáticamente cuando hay una nueva inserción de datos o una actualización (PUT/PATCH/DELETE).
+
+Ejemplo:
+```javascript
+const params = {
+	swagger: {
+		baseDoc: process.env.BASEPATH,
+		host: `${process.env.HOST}:${process.env.PORT}`,
+		folder: swaggerFolder,
+		info: {
+			version: 2.0,
+			title: 'Universal Pattern Example',
+			termsOfService: 'www.domain.com/terms',
+			contact: {
+				email: 'cesar@visiongroup.nyc',
+			},
+			license: {
+				name: 'Apache',
+				url: 'https://www.apache.org/licenses/LICENSE-2.0.html',
+			},
+		},
+	},
+	preMWS,
+	postMWS: [],
+	bodyParser: {
+		json: { limit: '2mb' },
+		urlencoded: { limit: '500mb', extended: false },
+	},
+	compress: true,
+	express: {
+		json: { limit: 10485760 },
+		static: 'public',
+	},
+	cors: true,
+	production: false,
+	routeController: (req, res, next) => next(),
+	port: process.env.PORT,
+	database: {
+		uri: process.env.CONNECTION,
+		name: process.env.DBNAME,
+	},
+	enabledStats: true,
+	cache: true,
+};
+```
+## Midiendo la performance con cache activado:
+```bash
+Running 10s test @ http://localhost:5000/services/brands?limit=50&page=1
+10 connections
+
+
+┌─────────┬──────┬──────┬───────┬──────┬─────────┬─────────┬───────┐
+│ Stat    │ 2.5% │ 50%  │ 97.5% │ 99%  │ Avg     │ Stdev   │ Max   │
+├─────────┼──────┼──────┼───────┼──────┼─────────┼─────────┼───────┤
+│ Latency │ 0 ms │ 0 ms │ 0 ms  │ 0 ms │ 0.01 ms │ 0.17 ms │ 21 ms │
+└─────────┴──────┴──────┴───────┴──────┴─────────┴─────────┴───────┘
+┌───────────┬─────────┬─────────┬─────────┬─────────┬───────────┬──────────┬─────────┐
+│ Stat      │ 1%      │ 2.5%    │ 50%     │ 97.5%   │ Avg       │ Stdev    │ Min     │
+├───────────┼─────────┼─────────┼─────────┼─────────┼───────────┼──────────┼─────────┤
+│ Req/Sec   │ 27,087  │ 27,087  │ 35,391  │ 45,503  │ 35,872.73 │ 4,176.62 │ 27,082  │
+├───────────┼─────────┼─────────┼─────────┼─────────┼───────────┼──────────┼─────────┤
+│ Bytes/Sec │ 25.6 MB │ 25.6 MB │ 33.4 MB │ 42.9 MB │ 33.8 MB   │ 3.93 MB  │ 25.5 MB │
+└───────────┴─────────┴─────────┴─────────┴─────────┴───────────┴──────────┴─────────┘
+
+Req/Bytes counts sampled once per second.
+# of samples: 11
+
+395k requests in 11.02s, 372 MB read
+
+```
+
+# Stats.
+En Universal Pattern podemos activar el monitor de request (no se recomienda para producción).
+El mismo permitirá ver en tiempo real cuantos request está procesando cada uno de los forks.
+
+![Stats](docs/assets/stats.png)
+
 # Clustering.
 Universal Pattern de forma automática utilizará el módulo clustering de Node.js, creando fork por cada core disponible.
 
 # Performance testing
 Usando autocannon para medir la performance del example incluido en Universal Pattern
+
 ```bash
 $ autocannon "http://localhost:5000/services/users?page=1&limit=30"
 ```
@@ -556,6 +648,12 @@ Req/Bytes counts sampled once per second.
 
 # Ejemplo
 Podemos ver un ejemplo completo de implementación en [este link](example/README.md)
+
+# Test
+[Documentacion de test](test/README.md)
+
+# Changelog
+See changelog [here](CHANGELOG.md)
 
 # License
 [MIT](LICENSE)
