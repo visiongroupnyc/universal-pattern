@@ -57,8 +57,8 @@ const params = {
 		uri: process.env.CONNECTION,
 		name: process.env.DBNAME,
 	},
-	enabledStats: true,
-	cache: true,
+	enabledStats: true, // activa el ver las estadísticas
+	cache: true, // activa el cache
 };
 
 async function init() {

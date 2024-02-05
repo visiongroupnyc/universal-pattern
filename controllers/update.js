@@ -39,6 +39,8 @@ function updateControllerFactory({
 			if (req.swagger.definition['x-swagger-fire']) {
 				await upFire(req, updateDocument);
 			}
+			// remove cache
+			res.__clearCache = true;
 			return res.json({ ...updateDocument });
 		} catch (err) {
 			return next(err);

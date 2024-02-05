@@ -36,6 +36,8 @@ function removeControllerFactory({
 				await upFire(req, removedDocument);
 			}
 
+			// remove cache
+			res.__clearCache = true;
 			return res.json({ ...removedDocument });
 		} catch (err) {
 			return next(err);
