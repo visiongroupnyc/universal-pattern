@@ -9,6 +9,7 @@ const headers = require('./mws/headers');
 const decodejwt = require('./mws/decodejwt');
 
 const swaggerFolder = path.join(process.cwd(), 'swagger');
+const routes = require('./routes');
 
 const preMWS = [];
 preMWS.push(
@@ -57,6 +58,7 @@ const params = {
 		uri: process.env.CONNECTION,
 		name: process.env.DBNAME,
 	},
+	routes,
 	enabledStats: true, // activa el ver las estadísticas
 	cache: true, // activa el cache
 };

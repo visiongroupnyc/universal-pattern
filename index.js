@@ -73,6 +73,7 @@ async function universalPattern(options = {}) {
 			host: 'localhost',
 			apiDocs: 'api-docs',
 			folder,
+			routes: {},
 			info: {
 				version: 2.0,
 				title: 'Server API',
@@ -139,15 +140,26 @@ async function universalPattern(options = {}) {
 	app.use(bodyParser.text());
 
 	app.use(cookieParser());
-	if (localOptions.express) {
-		if (localOptions.express.limit) {
+	if (localOptions?.express) {
+		if (localOptions?.express?.limit) {
 			app.use(express.json({ limit: localOptions.express.limit }));
 		}
-		if (localOptions.express.static) {
+		if (localOptions?.express?.static) {
 			app.use(express.static(localOptions.express.static));
 		}
 	}
 	localOptions.preMWS.forEach((mws) => app.use(mws));
+
+	if (localOptions?.routes) {
+		const { routes } = localOptions;
+		Object.keys(routes)
+			.forEach((method) => {
+				debug('additional route: ', method);
+				Object.keys(routes[method]).forEach((url) => {
+					app[method.toLowerCase()](url, routes[method][url]);
+				});
+			});
+	}
 
 	if (localOptions.compress) app.use(compression({ level: 9 }));
 	if (localOptions.cors) app.use(cors());
@@ -226,11 +238,11 @@ async function universalPattern(options = {}) {
 			}
 		});
 		const server = http.createServer(app);
-		server.listen(defaultOptions.port);
+		server.listen(localOptions.port);
 		debug(`Worker ${process.pid} started with instanceId ${UP.instanceId}`);
 	}
 
-	debug(`ready on *:${defaultOptions.port}`);
+	debug(`ready on *:${localOptions.port}`);
 	GlobalHooks(UP);
 	return UP;
 }

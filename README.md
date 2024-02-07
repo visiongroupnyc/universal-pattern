@@ -28,6 +28,7 @@ Powered by [Cesar Casas](https://www.linkedin.com/in/cesarcasas)
 	- [x-swagger-public-fields](#x-swagger-public-fields)
 	- [x-swagger-skip-fields](#x-swagger-skip-fields)
 	- [x-swagger-router-controller](#x-swagger-router-controller)
+- [Routes out UP Scope.](#routes-out-up-scope)
 - [Cache](#cache)
 	- [Midiendo la performance con cache activado:](#midiendo-la-performance-con-cache-activado)
 - [Stats.](#stats)
@@ -530,6 +531,65 @@ A continuación, el listado de controladores soportados en Universal Pattern.
 - [count](./docs/controllers/COUNT.md)
 - [today](./docs/controllers/TODAY.md)
 - [getLast](./docs/controllers/GETLAST.md)
+
+
+# Routes out UP Scope.
+Para trabajar con rutas fuera del scope de Universal Pattern podemos hacer uso de la propiedad `routes` del objeto de instancia.
+
+
+```javascript
+const params = {
+	swagger: {
+		baseDoc: process.env.BASEPATH,
+		host: `${process.env.HOST}:${process.env.PORT}`,
+		folder: swaggerFolder,
+		info: {
+			version: 2.0,
+			title: 'Universal Pattern Example',
+			termsOfService: 'www.domain.com/terms',
+			contact: {
+				email: 'cesar@visiongroup.nyc',
+			},
+			license: {
+				name: 'Apache',
+				url: 'https://www.apache.org/licenses/LICENSE-2.0.html',
+			},
+		},
+	},
+	preMWS,
+	postMWS: [],
+	bodyParser: {
+		json: { limit: '2mb' },
+		urlencoded: { limit: '500mb', extended: false },
+	},
+	compress: true,
+	express: {
+		json: { limit: 10485760 },
+		static: 'public',
+	},
+	cors: true,
+	production: false,
+	routeController: (req, res, next) => next(),
+	port: process.env.PORT,
+	database: {
+		uri: process.env.CONNECTION,
+		name: process.env.DBNAME,
+	},
+	routes: {
+		get: {
+			'/health': [
+				async (req, res, next) => {
+					req.testing = true;
+					next();
+				},
+				async (req, res) => res.status(200).end(`Working ${req.testing}`),
+			],
+		},
+	},
+	enabledStats: true, // activa el ver las estadísticas
+	cache: true, // activa el cache
+};
+```
 
 
 # Cache
