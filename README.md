@@ -707,7 +707,7 @@ Req/Bytes counts sampled once per second.
 ```
 
 # Ejemplo
-Podemos ver un ejemplo completo de implementación en [este link](example/README.md)
+Podemos ver un ejemplo completo de implementación en [este link](https://github.com/lortmorris/universal-pattern-example)
 
 # Test
 [Documentacion de test](test/README.md)

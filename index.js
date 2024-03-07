@@ -129,6 +129,7 @@ async function universalPattern(options = {}) {
 
 	app.use(async (req, res, next) => {
 		req.instanceId = UP.instanceId;
+		req.db = db;
 		next();
 	});
 
