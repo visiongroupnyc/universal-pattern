@@ -1,10 +1,13 @@
 {
   "name": "universal-pattern",
-  "version": "2.0.6",
-  "description": "",
-  "main": "index.js",
+  "version": "4.0.0",
+  "description": "Build powerful microservices using swagger, Node.js and MongoDB",
+  "main": "./dist/index.mjs",
+  "type": "module",
   "scripts": {
-    "test": "node"
+    "test": "node",
+    "build": "rm -Rf ./dist && npx tsc --build",
+    "dev": "npx tsx watch --env-file=.local.env ./src/index.ts"
   },
   "repository": {
     "type": "git",
@@ -16,7 +19,6 @@
     "swagger",
     "restfull",
     "api",
-    "visiongroup",
     "nodejs",
     "mongodb",
     "microservices"
@@ -27,17 +29,18 @@
     "url": "https://github.com/visiongroupnyc/universal-pattern/issues"
   },
   "engines": {
-    "node": ">= 18.0.0"
+    "node": ">= 22.0.0"
   },
   "contributors": [
     {
       "name": "Cesar Casas",
-      "email": "cesar@visiongroup.nyc"
+      "email": "cesar@stock42.com"
     }
   ],
   "homepage": "https://github.com/visiongroupnyc/universal-pattern#readme",
   "dependencies": {
     "body-parser": "^1.20.2",
+    "bson": "^6.6.0",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -50,12 +53,24 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.23.3",
-    "eslint": "^8.56.0",
-    "eslint-config-airbnb": "^19.0.4",
+    "@types/compression": "^1.7.5",
+    "@types/cookie-parser": "^1.4.7",
+    "@types/cors": "^2.8.17",
+    "@types/debug": "^4.1.12",
+    "@types/express": "^4.17.21",
+    "@types/js-yaml": "^4.0.9",
+    "@types/lodash": "^4.17.7",
+    "@typescript-eslint/eslint-plugin": "^7.17.0",
+    "@typescript-eslint/parser": "^7.17.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-prettier": "^5.2.1",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
-    "nodemon": "^3.0.3",
+    "prettier": "^3.3.3",
     "supertest": "^6.3.4",
-    "uuid": "^9.0.1"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.3"
   }
 }

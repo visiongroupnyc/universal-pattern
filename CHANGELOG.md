@@ -12,3 +12,6 @@
 
 ## Version 2.0.4
 - Added support for routes out of UP scope.
+
+## version 4.0.0
+- Refactor all code using TypeScript

@@ -1,4 +1,4 @@
-![Universal pattern](docs/assets/logo.png)
+![Universal pattern](documentation/assets/logo.png)
 
 Powered by [Cesar Casas](https://www.linkedin.com/in/cesarcasas)
 
@@ -41,7 +41,7 @@ Powered by [Cesar Casas](https://www.linkedin.com/in/cesarcasas)
 
 
 # Universal Pattern 💻
-![Universal pattern](docs/assets/universal-pattern-features.png)
+![Universal pattern](documentation/assets/universal-pattern-features.png)
 
 Universal Pattern es una librería que permite de una forma muy simple crear microservicios y endpoint utilizando [Node.js](https://nodejs.org), [Swagger](https://editor.swagger.io) y [MongoDB](https://www.mongodb.com/).
 
@@ -94,7 +94,7 @@ paths:
 
 La herramienta integra de manera nativa la documentación y las pruebas de endpoints a través de Swagger. Esto significa que los desarrolladores pueden generar y actualizar la documentación de su API de forma automática, así como probar los endpoints directamente desde la interfaz de Swagger. Esta integración elimina la necesidad de herramientas o procesos adicionales para la documentación y prueba de APIs, lo que simplifica considerablemente el mantenimiento y la gestión de la API.
 
-![Universal pattern](docs/assets/swagger-ui.png)
+![Universal pattern](documentation/assets/swagger-ui.png)
 
 ### Automatización de Validaciones y Control de Parámetros
 
@@ -525,12 +525,12 @@ paths:
 Indica el nombre del controlador que deseamos utilizar.
 El mismo puede ser propio de universal pattern o uno creado de forma customizada.
 A continuación, el listado de controladores soportados en Universal Pattern.
-- [insert](./docs/controllers/INSERT.md)
-- [search](./docs/controllers/SEARCH.md)
-- [remove](./docs/controllers/REMOVE.md)
-- [count](./docs/controllers/COUNT.md)
-- [today](./docs/controllers/TODAY.md)
-- [getLast](./docs/controllers/GETLAST.md)
+- [insert](./documentation/controllers/INSERT.md)
+- [search](./documentation/controllers/SEARCH.md)
+- [remove](./documentation/controllers/REMOVE.md)
+- [count](./documentation/controllers/COUNT.md)
+- [today](./documentation/controllers/TODAY.md)
+- [getLast](./documentation/controllers/GETLAST.md)
 
 
 # Routes out UP Scope.
@@ -670,7 +670,7 @@ Req/Bytes counts sampled once per second.
 En Universal Pattern podemos activar el monitor de request (no se recomienda para producción).
 El mismo permitirá ver en tiempo real cuantos request está procesando cada uno de los forks.
 
-![Stats](docs/assets/stats.png)
+![Stats](documentation/assets/stats.png)
 
 # Clustering.
 Universal Pattern de forma automática utilizará el módulo clustering de Node.js, creando fork por cada core disponible.

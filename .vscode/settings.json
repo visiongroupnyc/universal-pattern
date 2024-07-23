@@ -1,0 +1,37 @@
+{
+  "git.rebaseWhenSync": true,
+  "eslint.workingDirectories": [{ "mode": "auto" }, ".git-conventions"],
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "always",
+    "source.fixAll.eslint": "always",
+    "source.fixAll.stylelint": "always",
+  },
+  "stylelint.enable": true,
+  "stylelint.validate": ["css", "scss"],
+  "editor.defaultFormatter": "rvest.vs-code-prettier-eslint",
+  "editor.indentSize": "tabSize",
+  "editor.linkedEditing": true,
+  "editor.tabSize": 2,
+  "files.eol": "\n",
+  "terminal.integrated.scrollback": 10000,
+  "[yaml]": {
+    "editor.formatOnSave": false
+  },
+  "[json]": {
+    "editor.formatOnSave": false
+  },
+  "[jsonc]": {
+    "editor.formatOnSave": false,
+    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+  },
+  "[typescript]": {
+    "editor.formatOnSave": false
+  },
+  "[typescriptreact]": {
+    "editor.formatOnSave": false
+  },
+  "workbench.editorAssociations": {
+    "*.md": "vscode.markdown.preview.editor"
+  },
+}
